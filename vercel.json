@@ -1,9 +1,8 @@
 {
-  "version": 2,
-  "routes": [
+  "headers": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
+      "source": "/(.*)\\.(js|css|png|jpg|jpeg|svg|webp|woff2?)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
     }
   ]
 }
