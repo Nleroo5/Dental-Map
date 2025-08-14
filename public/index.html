@@ -567,32 +567,53 @@
     // ===========================================
     
     async function getDemographicData(center, radiusMiles) {
-      console.log('📊 Fetching demographic data...');
+      console.log('📊 Fetching real Census demographic data...');
       
-      // In production, this would call actual Census API
-      // For now, generating realistic demographic data based on location
+      try {
+        // Call our Census API endpoint
+        const response = await fetch('/api/census-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: center.lat(),
+            lng: center.lng(),
+            radius: radiusMiles
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          demographicData = result.demographics;
+          updateDemographicUI();
+          console.log('✅ Real Census data loaded:', demographicData);
+          return demographicData;
+        } else {
+          throw new Error(`Census API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Census API failed, using fallback:', error);
+        // Fallback to sophisticated simulation
+        return getFallbackDemographics(center, radiusMiles);
+      }
+    }
+    
+    function getFallbackDemographics(center, radiusMiles) {
+      // Sophisticated fallback when Census API fails
       const areaSqMiles = Math.PI * radiusMiles * radiusMiles;
       const populationDensity = getPopulationDensity(center);
-      
       const totalPop = Math.floor(areaSqMiles * populationDensity);
       const medianIncome = getMedianIncome(center);
-      
-      // Calculate qualified Invisalign prospects
-      // Demographics: Age 25-55, Income >$50k, Dental insurance
       const qualifiedPercent = calculateQualifiedPercent(medianIncome, center);
-      const qualifiedAudience = Math.floor(totalPop * qualifiedPercent);
       
-      demographicData = {
+      return {
         totalPopulation: totalPop,
-        qualifiedAudience: qualifiedAudience,
+        qualifiedAudience: Math.floor(totalPop * qualifiedPercent),
         medianIncome: medianIncome,
         qualifiedPercent: qualifiedPercent,
         areaSqMiles: areaSqMiles,
-        populationDensity: populationDensity
+        populationDensity: populationDensity,
+        dataSource: 'Fallback Simulation'
       };
-      
-      updateDemographicUI();
-      return demographicData;
     }
     
     function getPopulationDensity(center) {
