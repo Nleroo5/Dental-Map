@@ -829,28 +829,133 @@ function getFallbackDemographics(center, radiusMiles) {
         shareOfVoice: ourMarketShare
       };
       
-      updateCompetitorUI();
-      return competitorData;
+function updateCompetitorUI() {
+  if (!competitorData) return;
+  
+  // Update basic metrics
+  document.getElementById('invisProviders').textContent = competitorData.invisalignProviders;
+  document.getElementById('competitorSpend').textContent = `$${competitorData.competitorSpend.toLocaleString()}/mo`;
+  document.getElementById('marketShareCalc').textContent = `${competitorData.ourMarketShare}%`;
+  
+  // Update share of voice visualization
+  const voiceFill = document.getElementById('voiceFill');
+  const voiceDesc = document.getElementById('voiceDesc');
+  
+  setTimeout(() => {
+    voiceFill.style.width = `${competitorData.shareOfVoice}%`;
+  }, 500);
+  
+  // Enhanced description with live data indicators
+  let description = `Your $2,500 = ${competitorData.shareOfVoice}% of total market ad spend`;
+  
+  if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
+    description += ` • 🔴 LIVE DATA (${competitorData.totalActiveAds} active ads)`;
+  } else {
+    description += ` • Estimated from practice analysis`;
+  }
+  
+  voiceDesc.innerHTML = description;
+  
+  // Update section header with data quality
+  const competitorSection = document.querySelector('.card h3');
+  if (competitorSection) {
+    if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
+      competitorSection.innerHTML = '🕵️ Live Competitor Intelligence <span style="color:var(--success);font-size:10px;font-weight:normal;">• REAL FACEBOOK ADS</span>';
+    } else {
+      competitorSection.innerHTML = '🕵️ Competitor Intelligence <span style="color:var(--warning);font-size:10px;font-weight:normal;">• ENHANCED ANALYSIS</span>';
     }
+  }
+  
+  // Add live ad examples if available
+  if (competitorData.adExamples && competitorData.adExamples.length > 0) {
+    addLiveAdExamples(competitorData.adExamples);
+  }
+  
+  // Add messaging gaps analysis
+  if (competitorData.messagingGaps && competitorData.messagingGaps.length > 0) {
+    addMessagingGaps(competitorData.messagingGaps);
+  }
+  
+  // Show competitor warning based on activity
+  if (competitorData.totalActiveAds > 5) {
+    voiceDesc.innerHTML += ` <span style="color:var(--danger)">🚨 High ad activity detected</span>`;
+  } else if (competitorData.totalActiveAds > 0) {
+    voiceDesc.innerHTML += ` <span style="color:var(--warning)">⚠️ Active competition detected</span>`;
+  }
+  
+  // Log detailed breakdown for debugging
+  if (competitorData.competitorBreakdown) {
+    console.log('🏥 Competitor Intelligence Breakdown:', competitorData.competitorBreakdown);
+  }
+}
+
+function addLiveAdExamples(adExamples) {
+  // Find or create ad examples container
+  let adContainer = document.getElementById('liveAdExamples');
+  if (!adContainer) {
+    adContainer = document.createElement('div');
+    adContainer.id = 'liveAdExamples';
+    adContainer.innerHTML = `
+      <div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;">
+        <div style="font-weight:600;margin-bottom:8px;color:#fca5a5">🔴 LIVE COMPETITOR ADS</div>
+        <div id="adExamplesList"></div>
+      </div>
+    `;
     
-    async function getNearbyDentalPractices(center, radiusMiles) {
-      return new Promise((resolve) => {
-        const request = {
-          location: center,
-          radius: radiusMiles * 1609.34,
-          type: 'dentist'
-        };
-        
-        placesService.nearbySearch(request, (results, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK) {
-            resolve(results || []);
-          } else {
-            resolve([]);
-          }
-        });
-      });
-    }
+    // Insert after competitor spend section
+    const competitorCard = document.querySelector('.card h3').parentElement;
+    competitorCard.appendChild(adContainer);
+  }
+  
+  const adExamplesList = document.getElementById('adExamplesList');
+  adExamplesList.innerHTML = '';
+  
+  adExamples.forEach((ad, index) => {
+    const adElement = document.createElement('div');
+    adElement.style.cssText = 'font-size:11px;margin:4px 0;padding:6px;background:rgba(255,255,255,.05);border-radius:4px;';
+    adElement.innerHTML = `
+      <div style="font-weight:600;color:var(--warning)">${ad.practice}</div>
+      <div style="color:#e6f1f1;margin:2px 0">"${ad.headline}"</div>
+      <div style="color:#9ca3af;font-size:10px">${ad.spend} • ${ad.type} ad</div>
+    `;
+    adExamplesList.appendChild(adElement);
+  });
+}
+
+function addMessagingGaps(messagingGaps) {
+  // Find or create messaging gaps container
+  let gapsContainer = document.getElementById('messagingGaps');
+  if (!gapsContainer) {
+    gapsContainer = document.createElement('div');
+    gapsContainer.id = 'messagingGaps';
+    gapsContainer.innerHTML = `
+      <div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;">
+        <div style="font-weight:600;margin-bottom:8px;color:var(--success)">💡 STRATEGIC OPPORTUNITIES</div>
+        <div id="gapsList"></div>
+      </div>
+    `;
     
+    // Insert after live ads or competitor spend section
+    const competitorCard = document.querySelector('.card h3').parentElement;
+    competitorCard.appendChild(gapsContainer);
+  }
+  
+  const gapsList = document.getElementById('gapsList');
+  gapsList.innerHTML = '';
+  
+  messagingGaps.forEach(gap => {
+    const gapElement = document.createElement('div');
+    gapElement.style.cssText = 'font-size:11px;margin:3px 0;color:#85c7b3;';
+    gapElement.innerHTML = `• No competitors emphasizing: ${gap}`;
+    gapsList.appendChild(gapElement);
+  });
+  
+  // Add strategic recommendation
+  const recommendation = document.createElement('div');
+  recommendation.style.cssText = 'font-size:11px;margin-top:8px;color:var(--success);font-weight:600;';
+  recommendation.innerHTML = '🎯 Your video ads can dominate these gaps';
+  gapsList.appendChild(recommendation);
+}
     async function identifyInvisalignProviders(center, radiusMiles) {
       return new Promise((resolve) => {
         const request = {
