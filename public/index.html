@@ -443,7 +443,7 @@
       const searchInput = document.getElementById('search');
       const autocomplete = new google.maps.places.Autocomplete(searchInput, {
         fields: ['place_id', 'name', 'formatted_address', 'geometry'],
-        types: ['geocode']
+        types: ['establishment']
       });
       
       autocomplete.addListener('place_changed', async () => {
