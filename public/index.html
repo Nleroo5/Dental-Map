@@ -567,62 +567,43 @@
     // ===========================================
     
     async function getDemographicData(center, radiusMiles) {
-  console.log('📊 Fetching demographic data...');
-  
-  try {
-    // Try Census API first
-    console.log('Attempting Census API call...');
-    const response = await fetch('/api/census-data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        lat: center.lat(),
-        lng: center.lng(),
-        radius: radiusMiles
-      })
-    });
-    
-    if (response.ok) {
-      const result = await response.json();
-      console.log('✅ Census API success:', result);
-      demographicData = result.demographics;
-      updateDemographicUI();
-      return demographicData;
-    } else {
-      console.error('Census API failed:', response.status, await response.text());
-      throw new Error(`Census API error: ${response.status}`);
+      console.log('📊 Fetching demographic data...');
+      
+      try {
+        // Try Census API first
+        console.log('Attempting Census API call...');
+        const response = await fetch('/api/census-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            lat: center.lat(),
+            lng: center.lng(),
+            radius: radiusMiles
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Census API success:', result);
+          demographicData = result.demographics;
+          updateDemographicUI();
+          return demographicData;
+        } else {
+          console.error('Census API failed:', response.status, await response.text());
+          throw new Error(`Census API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Census API error, using fallback:', error);
+        
+        // Use fallback simulation
+        demographicData = getFallbackDemographics(center, radiusMiles);
+        updateDemographicUI();
+        return demographicData;
+      }
     }
-  } catch (error) {
-    console.error('Census API error, using fallback:', error);
-    
-    // Use fallback simulation
-    demographicData = getFallbackDemographics(center, radiusMiles);
-    updateDemographicUI();
-    return demographicData;
-  }
-}
 
-function getFallbackDemographics(center, radiusMiles) {
-  console.log('Using fallback demographics simulation');
-  const areaSqMiles = Math.PI * radiusMiles * radiusMiles;
-  const populationDensity = getPopulationDensity(center);
-  const totalPop = Math.floor(areaSqMiles * populationDensity);
-  const medianIncome = getMedianIncome(center);
-  const qualifiedPercent = calculateQualifiedPercent(medianIncome, center);
-  
-  return {
-    totalPopulation: totalPop,
-    qualifiedAudience: Math.floor(totalPop * qualifiedPercent),
-    medianIncome: medianIncome,
-    qualifiedPercent: qualifiedPercent,
-    areaSqMiles: areaSqMiles,
-    populationDensity: populationDensity,
-    dataSource: 'Fallback Simulation'
-  };
-}
-    
     function getFallbackDemographics(center, radiusMiles) {
-      // Sophisticated fallback when Census API fails
+      console.log('Using fallback demographics simulation');
       const areaSqMiles = Math.PI * radiusMiles * radiusMiles;
       const populationDensity = getPopulationDensity(center);
       const totalPop = Math.floor(areaSqMiles * populationDensity);
@@ -801,7 +782,7 @@ function getFallbackDemographics(center, radiusMiles) {
     }
 
     // ===========================================
-    // 5. COMPETITOR INTELLIGENCE LAYER
+    // 5. ENHANCED COMPETITOR INTELLIGENCE LAYER
     // ===========================================
     
     async function getCompetitorIntelligence(center, radiusMiles) {
@@ -810,206 +791,86 @@ function getFallbackDemographics(center, radiusMiles) {
       // Get dental practices in area
       const practices = await getNearbyDentalPractices(center, radiusMiles);
       
-      // Identify Invisalign providers
-      const invisalignProviders = await identifyInvisalignProviders(center, radiusMiles);
+      // Enhanced competitor analysis with Facebook Ad Library
+      const competitorAnalysis = await getEnhancedCompetitorAnalysis(practices, center, radiusMiles);
       
-      // Estimate competitor ad spend using Meta Ad Library data (simulated)
-      const competitorSpend = await estimateCompetitorSpend(invisalignProviders);
-      
-      // Calculate market share
-      const ourSpend = 2500;
-      const totalMarketSpend = competitorSpend + ourSpend;
-      const ourMarketShare = Math.round((ourSpend / totalMarketSpend) * 100);
-      
-      competitorData = {
-        totalPractices: practices.length,
-        invisalignProviders: invisalignProviders.length,
-        competitorSpend: competitorSpend,
-        ourMarketShare: ourMarketShare,
-        shareOfVoice: ourMarketShare
-      };
-      
-function updateCompetitorUI() {
-  if (!competitorData) return;
-  
-  // Update basic metrics
-  document.getElementById('invisProviders').textContent = competitorData.invisalignProviders;
-  document.getElementById('competitorSpend').textContent = `$${competitorData.competitorSpend.toLocaleString()}/mo`;
-  document.getElementById('marketShareCalc').textContent = `${competitorData.ourMarketShare}%`;
-  
-  // Update share of voice visualization
-  const voiceFill = document.getElementById('voiceFill');
-  const voiceDesc = document.getElementById('voiceDesc');
-  
-  setTimeout(() => {
-    voiceFill.style.width = `${competitorData.shareOfVoice}%`;
-  }, 500);
-  
-  // Enhanced description with live data indicators
-  let description = `Your $2,500 = ${competitorData.shareOfVoice}% of total market ad spend`;
-  
-  if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
-    description += ` • 🔴 LIVE DATA (${competitorData.totalActiveAds} active ads)`;
-  } else {
-    description += ` • Estimated from practice analysis`;
-  }
-  
-  voiceDesc.innerHTML = description;
-  
-  // Update section header with data quality
-  const competitorSection = document.querySelector('.card h3');
-  if (competitorSection) {
-    if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
-      competitorSection.innerHTML = '🕵️ Live Competitor Intelligence <span style="color:var(--success);font-size:10px;font-weight:normal;">• REAL FACEBOOK ADS</span>';
-    } else {
-      competitorSection.innerHTML = '🕵️ Competitor Intelligence <span style="color:var(--warning);font-size:10px;font-weight:normal;">• ENHANCED ANALYSIS</span>';
+      competitorData = competitorAnalysis;
+      updateCompetitorUI();
+      return competitorData;
     }
-  }
-  
-  // Add live ad examples if available
-  if (competitorData.adExamples && competitorData.adExamples.length > 0) {
-    addLiveAdExamples(competitorData.adExamples);
-  }
-  
-  // Add messaging gaps analysis
-  if (competitorData.messagingGaps && competitorData.messagingGaps.length > 0) {
-    addMessagingGaps(competitorData.messagingGaps);
-  }
-  
-  // Show competitor warning based on activity
-  if (competitorData.totalActiveAds > 5) {
-    voiceDesc.innerHTML += ` <span style="color:var(--danger)">🚨 High ad activity detected</span>`;
-  } else if (competitorData.totalActiveAds > 0) {
-    voiceDesc.innerHTML += ` <span style="color:var(--warning)">⚠️ Active competition detected</span>`;
-  }
-  
-  // Log detailed breakdown for debugging
-  if (competitorData.competitorBreakdown) {
-    console.log('🏥 Competitor Intelligence Breakdown:', competitorData.competitorBreakdown);
-  }
-}
-
-function addLiveAdExamples(adExamples) {
-  // Find or create ad examples container
-  let adContainer = document.getElementById('liveAdExamples');
-  if (!adContainer) {
-    adContainer = document.createElement('div');
-    adContainer.id = 'liveAdExamples';
-    adContainer.innerHTML = `
-      <div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;">
-        <div style="font-weight:600;margin-bottom:8px;color:#fca5a5">🔴 LIVE COMPETITOR ADS</div>
-        <div id="adExamplesList"></div>
-      </div>
-    `;
     
-    // Insert after competitor spend section
-    const competitorCard = document.querySelector('.card h3').parentElement;
-    competitorCard.appendChild(adContainer);
-  }
-  
-  const adExamplesList = document.getElementById('adExamplesList');
-  adExamplesList.innerHTML = '';
-  
-  adExamples.forEach((ad, index) => {
-    const adElement = document.createElement('div');
-    adElement.style.cssText = 'font-size:11px;margin:4px 0;padding:6px;background:rgba(255,255,255,.05);border-radius:4px;';
-    adElement.innerHTML = `
-      <div style="font-weight:600;color:var(--warning)">${ad.practice}</div>
-      <div style="color:#e6f1f1;margin:2px 0">"${ad.headline}"</div>
-      <div style="color:#9ca3af;font-size:10px">${ad.spend} • ${ad.type} ad</div>
-    `;
-    adExamplesList.appendChild(adElement);
-  });
-}
-
-function addMessagingGaps(messagingGaps) {
-  // Find or create messaging gaps container
-  let gapsContainer = document.getElementById('messagingGaps');
-  if (!gapsContainer) {
-    gapsContainer = document.createElement('div');
-    gapsContainer.id = 'messagingGaps';
-    gapsContainer.innerHTML = `
-      <div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;">
-        <div style="font-weight:600;margin-bottom:8px;color:var(--success)">💡 STRATEGIC OPPORTUNITIES</div>
-        <div id="gapsList"></div>
-      </div>
-    `;
-    
-    // Insert after live ads or competitor spend section
-    const competitorCard = document.querySelector('.card h3').parentElement;
-    competitorCard.appendChild(gapsContainer);
-  }
-  
-  const gapsList = document.getElementById('gapsList');
-  gapsList.innerHTML = '';
-  
-  messagingGaps.forEach(gap => {
-    const gapElement = document.createElement('div');
-    gapElement.style.cssText = 'font-size:11px;margin:3px 0;color:#85c7b3;';
-    gapElement.innerHTML = `• No competitors emphasizing: ${gap}`;
-    gapsList.appendChild(gapElement);
-  });
-  
-  // Add strategic recommendation
-  const recommendation = document.createElement('div');
-  recommendation.style.cssText = 'font-size:11px;margin-top:8px;color:var(--success);font-weight:600;';
-  recommendation.innerHTML = '🎯 Your video ads can dominate these gaps';
-  gapsList.appendChild(recommendation);
-}
-    async function identifyInvisalignProviders(center, radiusMiles) {
+    async function getNearbyDentalPractices(center, radiusMiles) {
       return new Promise((resolve) => {
         const request = {
           location: center,
           radius: radiusMiles * 1609.34,
-          query: 'Invisalign dentist orthodontist'
+          type: 'dentist'
         };
         
-        placesService.textSearch(request, (results, status) => {
+        placesService.nearbySearch(request, (results, status) => {
           if (status === google.maps.places.PlacesServiceStatus.OK) {
-            // Filter for actual Invisalign providers
-            const invisProviders = (results || []).filter(place => {
-              const name = (place.name || '').toLowerCase();
-              return name.includes('invisalign') || 
-                     name.includes('orthodontic') || 
-                     name.includes('clear aligner');
-            });
-            resolve(invisProviders);
+            resolve(results || []);
           } else {
             resolve([]);
           }
         });
       });
     }
-    
-    async function estimateCompetitorSpend(invisalignProviders) {
-      // Simulate Meta Ad Library analysis
-      // In production, this would scrape actual competitor ads
-      
-      let totalSpend = 0;
-      invisalignProviders.forEach(provider => {
-        // Estimate spend based on practice size and rating
-        const rating = provider.rating || 3.5;
-        const reviewCount = provider.user_ratings_total || 50;
+
+    async function getEnhancedCompetitorAnalysis(practices, center, radiusMiles) {
+      try {
+        const response = await fetch('/api/competitor-analysis', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            practices: practices,
+            location: { lat: center.lat(), lng: center.lng() },
+            radius: radiusMiles
+          })
+        });
         
-        let estimatedSpend = 1200; // Base spend
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Enhanced competitor analysis complete:', result);
+          return result;
+        } else {
+          console.error('Competitor analysis API failed:', response.status);
+          throw new Error(`Competitor API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Competitor analysis error:', error);
         
-        // Adjust for practice quality indicators
-        if (rating > 4.0) estimatedSpend += 600;
-        if (reviewCount > 100) estimatedSpend += 400;
-        if (reviewCount > 500) estimatedSpend += 800;
-        
-        // Random variation
-        estimatedSpend += (Math.random() - 0.5) * 400;
-        
-        totalSpend += Math.max(600, estimatedSpend);
-      });
-      
-      return Math.floor(totalSpend);
+        // Fallback to basic analysis
+        return createFallbackCompetitorAnalysis(practices);
+      }
     }
+
+    function createFallbackCompetitorAnalysis(practices) {
+      const invisalignProviders = Math.floor(practices.length * 0.3); // 30% offer Invisalign
+      const competitorSpend = invisalignProviders * 1500; // $1500 avg per practice
+      const ourSpend = 2500;
+      const ourMarketShare = Math.round((ourSpend / (competitorSpend + ourSpend)) * 100);
+      
+      return {
+        invisalignProviders,
+        competitorSpend,
+        ourMarketShare,
+        shareOfVoice: ourMarketShare,
+        totalActiveAds: 0,
+        dataSource: 'Practice Analysis',
+        messagingGaps: ['Video advertising', 'Territory protection', 'Actor-led content'],
+        adExamples: []
+      };
+    }
+    
+    // ===========================================
+    // 6. ENHANCED COMPETITOR UI WITH LIVE DATA
+    // ===========================================
     
     function updateCompetitorUI() {
       if (!competitorData) return;
       
+      // Update basic metrics
       document.getElementById('invisProviders').textContent = competitorData.invisalignProviders;
       document.getElementById('competitorSpend').textContent = `${competitorData.competitorSpend.toLocaleString()}/mo`;
       document.getElementById('marketShareCalc').textContent = `${competitorData.ourMarketShare}%`;
@@ -1022,16 +883,120 @@ function addMessagingGaps(messagingGaps) {
         voiceFill.style.width = `${competitorData.shareOfVoice}%`;
       }, 500);
       
-      voiceDesc.textContent = `Your $2,500 = ${competitorData.shareOfVoice}% of total market ad spend`;
+      // Enhanced description with live data indicators
+      let description = `Your $2,500 = ${competitorData.shareOfVoice}% of total market ad spend`;
       
-      // Show competitor warning if high competition
-      if (competitorData.invisalignProviders > 5) {
-        voiceDesc.innerHTML += ` <span style="color:var(--warning)">⚠️ High competition detected</span>`;
+      if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
+        description += ` • 🔴 LIVE DATA (${competitorData.totalActiveAds} active ads)`;
+      } else {
+        description += ` • Estimated from practice analysis`;
+      }
+      
+      voiceDesc.innerHTML = description;
+      
+      // Update section header with data quality
+      const competitorSection = document.querySelector('.card h3');
+      if (competitorSection) {
+        if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
+          competitorSection.innerHTML = '🕵️ Live Competitor Intelligence <span style="color:var(--success);font-size:10px;font-weight:normal;">• REAL FACEBOOK ADS</span>';
+        } else {
+          competitorSection.innerHTML = '🕵️ Competitor Intelligence <span style="color:var(--warning);font-size:10px;font-weight:normal;">• ENHANCED ANALYSIS</span>';
+        }
+      }
+      
+      // Add live ad examples if available
+      if (competitorData.adExamples && competitorData.adExamples.length > 0) {
+        addLiveAdExamples(competitorData.adExamples);
+      }
+      
+      // Add messaging gaps analysis
+      if (competitorData.messagingGaps && competitorData.messagingGaps.length > 0) {
+        addMessagingGaps(competitorData.messagingGaps);
+      }
+      
+      // Show competitor warning based on activity
+      if (competitorData.totalActiveAds > 5) {
+        voiceDesc.innerHTML += ` <span style="color:var(--danger)">🚨 High ad activity detected</span>`;
+      } else if (competitorData.totalActiveAds > 0) {
+        voiceDesc.innerHTML += ` <span style="color:var(--warning)">⚠️ Active competition detected</span>`;
+      }
+      
+      // Log detailed breakdown for debugging
+      if (competitorData.competitorBreakdown) {
+        console.log('🏥 Competitor Intelligence Breakdown:', competitorData.competitorBreakdown);
       }
     }
 
+    function addLiveAdExamples(adExamples) {
+      // Find or create ad examples container
+      let adContainer = document.getElementById('liveAdExamples');
+      if (!adContainer) {
+        adContainer = document.createElement('div');
+        adContainer.id = 'liveAdExamples';
+        adContainer.innerHTML = `
+          <div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;">
+            <div style="font-weight:600;margin-bottom:8px;color:#fca5a5">🔴 LIVE COMPETITOR ADS</div>
+            <div id="adExamplesList"></div>
+          </div>
+        `;
+        
+        // Insert after competitor spend section
+        const competitorCard = document.querySelector('#competitorSpend').closest('.card');
+        competitorCard.appendChild(adContainer);
+      }
+      
+      const adExamplesList = document.getElementById('adExamplesList');
+      adExamplesList.innerHTML = '';
+      
+      adExamples.forEach((ad, index) => {
+        const adElement = document.createElement('div');
+        adElement.style.cssText = 'font-size:11px;margin:4px 0;padding:6px;background:rgba(255,255,255,.05);border-radius:4px;';
+        adElement.innerHTML = `
+          <div style="font-weight:600;color:var(--warning)">${ad.practice}</div>
+          <div style="color:#e6f1f1;margin:2px 0">"${ad.headline}"</div>
+          <div style="color:#9ca3af;font-size:10px">${ad.spend} • ${ad.type} ad</div>
+        `;
+        adExamplesList.appendChild(adElement);
+      });
+    }
+
+    function addMessagingGaps(messagingGaps) {
+      // Find or create messaging gaps container
+      let gapsContainer = document.getElementById('messagingGaps');
+      if (!gapsContainer) {
+        gapsContainer = document.createElement('div');
+        gapsContainer.id = 'messagingGaps';
+        gapsContainer.innerHTML = `
+          <div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;">
+            <div style="font-weight:600;margin-bottom:8px;color:var(--success)">💡 STRATEGIC OPPORTUNITIES</div>
+            <div id="gapsList"></div>
+          </div>
+        `;
+        
+        // Insert after live ads or competitor spend section
+        const competitorCard = document.querySelector('#competitorSpend').closest('.card');
+        competitorCard.appendChild(gapsContainer);
+      }
+      
+      const gapsList = document.getElementById('gapsList');
+      gapsList.innerHTML = '';
+      
+      messagingGaps.forEach(gap => {
+        const gapElement = document.createElement('div');
+        gapElement.style.cssText = 'font-size:11px;margin:3px 0;color:#85c7b3;';
+        gapElement.innerHTML = `• No competitors emphasizing: ${gap}`;
+        gapsList.appendChild(gapElement);
+      });
+      
+      // Add strategic recommendation
+      const recommendation = document.createElement('div');
+      recommendation.style.cssText = 'font-size:11px;margin-top:8px;color:var(--success);font-weight:600;';
+      recommendation.innerHTML = '🎯 Your video ads can dominate these gaps';
+      gapsList.appendChild(recommendation);
+    }
+
     // ===========================================
-    // 6. REAL-TIME TERRITORY LOCK MECHANISM
+    // 7. REAL-TIME TERRITORY LOCK MECHANISM
     // ===========================================
     
     function lockTerritory() {
@@ -1157,7 +1122,7 @@ function addMessagingGaps(messagingGaps) {
     }
 
     // ===========================================
-    // 7. AI-GENERATED TERRITORY ANALYSIS
+    // 8. AI-GENERATED TERRITORY ANALYSIS
     // ===========================================
     
     async function generateAIAnalysis() {
@@ -1239,7 +1204,7 @@ Lock this territory today to secure exclusive access to these ${qualified} high-
     }
 
     // ===========================================
-    // TERRITORY REPORT PDF GENERATION
+    // 9. TERRITORY REPORT PDF GENERATION
     // ===========================================
     
     function generateTerritoryReport() {
@@ -1377,7 +1342,7 @@ Lock this territory today to secure exclusive access to these ${qualified} high-
     }
 
     // ===========================================
-    // EVENT HANDLERS & UTILITIES
+    // 10. EVENT HANDLERS & UTILITIES
     // ===========================================
     
     function setupAddressSearch() {
