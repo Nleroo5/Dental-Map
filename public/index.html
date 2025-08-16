@@ -354,6 +354,8 @@
           </div>
           <div class="meta" id="digitalMeta">Analysis of online presence and advertising activity</div>
         </div>
+
+        <!-- 6. ROI Analysis -->
         <div class="card">
           <h3>💰 ROI Analysis</h3>
           <div class="roi-breakdown">
@@ -798,7 +800,7 @@
       const newPractices = practices.filter(p => (p.user_ratings_total || 0) < 20).length;
       const withWebsites = practices.filter(p => p.website).length;
       
-      const avgRating = practices.reduce((sum, p) => sum + (p.rating || 0), 0) / totalPractices;
+      const avgRating = totalPractices > 0 ? practices.reduce((sum, p) => sum + (p.rating || 0), 0) / totalPractices : 0;
       const penetrationRate = totalPractices > 0 ? (invisalignProviders / totalPractices) : 0;
       
       // Calculate market density (practices per 1000 residents)
@@ -880,6 +882,17 @@
         `${qualifiedPercent}% qualified prospects • ${demographics.dataSource} data`;
     }
     
+    function updateMarketIntelligence(marketData) {
+      const penetrationPercent = (marketData.penetrationRate * 100).toFixed(0);
+      document.getElementById('penetrationRate').textContent = `${penetrationPercent}%`;
+      document.getElementById('avgRating').textContent = marketData.avgRating.toFixed(1);
+      document.getElementById('competitionLevel').textContent = marketData.competitionLevel;
+      document.getElementById('opportunityScore').textContent = `${marketData.opportunityScore}/100`;
+      
+      document.getElementById('intelligenceMeta').textContent = 
+        `Analysis of ${marketData.totalPractices} practices • ${marketData.withMetaAds} actively advertising`;
+    }
+    
     function updatePracticeQuality(marketData) {
       document.getElementById('avgPracticeRating').textContent = marketData.avgRating.toFixed(1);
       document.getElementById('highRatedCount').textContent = marketData.highRated;
@@ -910,15 +923,6 @@
       
       document.getElementById('digitalMeta').textContent = 
         `${adPercent}% actively advertising • ${digitalGap} practices not advertising online`;
-    }
-      const penetrationPercent = (marketData.penetrationRate * 100).toFixed(0);
-      document.getElementById('penetrationRate').textContent = `${penetrationPercent}%`;
-      document.getElementById('avgRating').textContent = marketData.avgRating.toFixed(1);
-      document.getElementById('competitionLevel').textContent = marketData.competitionLevel;
-      document.getElementById('opportunityScore').textContent = `${marketData.opportunityScore}/100`;
-      
-      document.getElementById('intelligenceMeta').textContent = 
-        `Analysis of ${marketData.totalPractices} practices • ${marketData.withMetaAds} actively advertising`;
     }
     
     function updateROIAnalysis(marketData, demographics) {
@@ -986,108 +990,15 @@
       applyFilters();
       
       // Update UI
-      const button = document.getElementById(`filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`);
-      button.classList.toggle('active', activeFilters[filterName]);
+      const buttonId = `filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`;
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.classList.toggle('active', activeFilters[filterName]);
+      }
     }
 
     // ===========================================
-    // 8. HEATMAP FUNCTIONS
-    // ===========================================
-    
-    function toggleIncomeHeatmap() {
-      const btn = document.getElementById('incomeHeatmap');
-      btn.classList.toggle('active');
-      
-      if (btn.classList.contains('active')) {
-        showIncomeHeatmap();
-      } else {
-        hideHeatmap();
-      }
-    }
-    
-    function showIncomeHeatmap() {
-      if (!demographicData) return;
-      
-      // Clear existing heatmap
-      hideHeatmap();
-      
-      // Create income-based heatmap data
-      const heatmapData = generateIncomeHeatmapData();
-      
-      heatmap = new google.maps.visualization.HeatmapLayer({
-        data: heatmapData,
-        map: map,
-        radius: 20,
-        gradient: [
-          'rgba(0, 255, 255, 0)',
-          'rgba(0, 255, 255, 1)',
-          'rgba(0, 191, 255, 1)',
-          'rgba(0, 127, 255, 1)',
-          'rgba(0, 63, 255, 1)',
-          'rgba(0, 0, 255, 1)',
-          'rgba(0, 0, 223, 1)',
-          'rgba(0, 0, 191, 1)',
-          'rgba(0, 0, 159, 1)',
-          'rgba(0, 0, 127, 1)',
-          'rgba(63, 0, 91, 1)',
-          'rgba(127, 0, 63, 1)',
-          'rgba(191, 0, 31, 1)',
-          'rgba(255, 0, 0, 1)'
-        ]
-      });
-    }
-    
-    function generateIncomeHeatmapData() {
-      const center = map.getCenter();
-      const heatmapData = [];
-      
-      // Generate sample income data points around the area
-      for (let i = 0; i < 50; i++) {
-        const lat = center.lat() + (Math.random() - 0.5) * 0.1;
-        const lng = center.lng() + (Math.random() - 0.5) * 0.1;
-        const weight = Math.random(); // Income level (0-1)
-        
-        heatmapData.push({
-          location: new google.maps.LatLng(lat, lng),
-          weight: weight
-        });
-      }
-      
-      return heatmapData;
-    }
-    
-    function hideHeatmap() {
-      if (heatmap) {
-        heatmap.setMap(null);
-        heatmap = null;
-      }
-      
-      // Remove active class from all heatmap buttons
-      document.querySelectorAll('.heatmap-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-    }
-    
-    function toggleAgeHeatmap() {
-      const btn = document.getElementById('ageHeatmap');
-      hideHeatmap();
-      btn.classList.add('active');
-      
-      // Age heatmap implementation would go here
-      console.log('Age demographics heatmap not yet implemented');
-    }
-    
-    function toggleBehaviorHeatmap() {
-      const btn = document.getElementById('behaviorHeatmap');
-      hideHeatmap();
-      btn.classList.add('active');
-      
-      // Behavior/interest heatmap implementation would go here
-      console.log('Interest targeting heatmap not yet implemented');
-    }
-
-    // ===========================================
-    // 9. MARKET ANALYSIS GENERATION
+    // 8. MARKET ANALYSIS GENERATION
     // ===========================================
     
     function generateMarketAnalysis(marketData, demographics) {
@@ -1161,7 +1072,7 @@ ${getStrategicRecommendations(marketData, demographics)}`;
     }
 
     // ===========================================
-    // 10. REPORT GENERATION
+    // 9. REPORT GENERATION
     // ===========================================
     
     function generateMarketReport() {
@@ -1264,7 +1175,7 @@ ${getStrategicRecommendations(marketData, demographics)}`;
     }
 
     // ===========================================
-    // 11. EVENT LISTENERS
+    // 10. EVENT LISTENERS
     // ===========================================
     
     function bindEventListeners() {
