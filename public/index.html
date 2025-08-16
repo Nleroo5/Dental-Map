@@ -280,11 +280,6 @@
               <div class="demo-desc">Median Income</div>
             </div>
           </div>
-          <div class="heatmap-controls">
-            <button class="heatmap-btn" id="incomeHeatmap">💰 Income Heatmap</button>
-            <button class="heatmap-btn" id="ageHeatmap">👨‍👩‍👧‍👦 Age Demographics</button>
-            <button class="heatmap-btn" id="behaviorHeatmap">🎯 Interest Targeting</button>
-          </div>
           <div class="meta" id="audienceMeta">US Census + demographic analysis</div>
         </div>
 
@@ -312,7 +307,53 @@
           <div class="meta" id="intelligenceMeta">Market analysis based on practice data</div>
         </div>
 
-        <!-- 4. ROI Analysis -->
+        <!-- 4. Practice Quality Analysis -->
+        <div class="card">
+          <h3>⭐ Practice Quality Analysis</h3>
+          <div class="intel-grid">
+            <div class="intel-metric">
+              <div class="intel-value" id="avgPracticeRating">--</div>
+              <div class="intel-label">Average Rating</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="highRatedCount">--</div>
+              <div class="intel-label">4.0+ Star Practices</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="lowRatedCount">--</div>
+              <div class="intel-label">Below 4.0 Stars</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="newPractices">--</div>
+              <div class="intel-label">New/Low Reviews</div>
+            </div>
+          </div>
+          <div class="meta" id="qualityMeta">Based on Google Reviews and ratings data</div>
+        </div>
+
+        <!-- 5. Digital Marketing Analysis -->
+        <div class="card">
+          <h3>📱 Digital Marketing Landscape</h3>
+          <div class="intel-grid">
+            <div class="intel-metric">
+              <div class="intel-value" id="practicesWithAds">--</div>
+              <div class="intel-label">Actively Advertising</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="practicesWithWebsites">--</div>
+              <div class="intel-label">Have Websites</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="digitalGap">--</div>
+              <div class="intel-label">Digital Gap</div>
+            </div>
+            <div class="intel-metric">
+              <div class="intel-value" id="marketingOpportunity">--</div>
+              <div class="intel-label">Marketing Opportunity</div>
+            </div>
+          </div>
+          <div class="meta" id="digitalMeta">Analysis of online presence and advertising activity</div>
+        </div>
         <div class="card">
           <h3>💰 ROI Analysis</h3>
           <div class="roi-breakdown">
@@ -336,7 +377,7 @@
           <div class="meta">Conservative projections based on market data</div>
         </div>
 
-        <!-- 5. Competitive Analysis -->
+        <!-- 7. Competitive Analysis -->
         <div class="card">
           <h3>🎯 Competitive Analysis</h3>
           <div class="competitor-summary">
@@ -360,7 +401,7 @@
           <div class="meta" id="competitorMeta">Practice intelligence and advertising analysis</div>
         </div>
 
-        <!-- 6. Market Report -->
+        <!-- 8. Market Report -->
         <div class="card">
           <h3>📋 Market Analysis</h3>
           <div id="marketAnalysis" class="ai-output">
@@ -402,6 +443,7 @@
     let selectedLocation = null;
     let allPractices = [], practiceMarkers = [];
     let demographicData = null, marketData = null;
+    let radiusCircle = null;
     let activeFilters = {
       invisalignOnly: false,
       highRatedOnly: false,
@@ -481,6 +523,9 @@
         // Clear existing data
         clearMap();
         
+        // Show radius circle
+        showRadiusCircle(selectedLocation, radiusMiles);
+        
         // Get practices in area
         allPractices = await getNearbyPractices(selectedLocation, radiusMiles);
         console.log(`Found ${allPractices.length} practices`);
@@ -499,6 +544,8 @@
         updateMarketOverview(marketData);
         updateDemographics(demographicData);
         updateMarketIntelligence(marketData);
+        updatePracticeQuality(marketData);
+        updateDigitalMarketing(marketData);
         updateROIAnalysis(marketData, demographicData);
         updateCompetitiveAnalysis(marketData);
         generateMarketAnalysis(marketData, demographicData);
@@ -509,6 +556,25 @@
         console.error('❌ Market analysis failed:', error);
         alert('Analysis failed. Please try again.');
       }
+    }
+    
+    function showRadiusCircle(location, radiusMiles) {
+      // Clear existing circle
+      if (radiusCircle) {
+        radiusCircle.setMap(null);
+      }
+      
+      // Create new radius circle
+      radiusCircle = new google.maps.Circle({
+        strokeColor: '#F2A922',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#F2A922',
+        fillOpacity: 0.1,
+        map: map,
+        center: new google.maps.LatLng(location.lat, location.lng),
+        radius: radiusMiles * 1609.34 // Convert miles to meters
+      });
     }
     
     async function getNearbyPractices(location, radiusMiles) {
@@ -658,6 +724,12 @@
       });
       practiceMarkers = [];
       
+      // Clear radius circle
+      if (radiusCircle) {
+        radiusCircle.setMap(null);
+        radiusCircle = null;
+      }
+      
       // Clear heatmap if exists
       if (heatmap) {
         heatmap.setMap(null);
@@ -722,6 +794,9 @@
       const invisalignProviders = practices.filter(p => p.isInvisalignProvider).length;
       const withMetaAds = practices.filter(p => p.hasMetaAds).length;
       const highRated = practices.filter(p => p.rating >= 4.0).length;
+      const lowRated = practices.filter(p => p.rating > 0 && p.rating < 4.0).length;
+      const newPractices = practices.filter(p => (p.user_ratings_total || 0) < 20).length;
+      const withWebsites = practices.filter(p => p.website).length;
       
       const avgRating = practices.reduce((sum, p) => sum + (p.rating || 0), 0) / totalPractices;
       const penetrationRate = totalPractices > 0 ? (invisalignProviders / totalPractices) : 0;
@@ -745,6 +820,9 @@
         invisalignProviders,
         withMetaAds,
         highRated,
+        lowRated,
+        newPractices,
+        withWebsites,
         avgRating,
         penetrationRate,
         marketDensity,
@@ -802,7 +880,37 @@
         `${qualifiedPercent}% qualified prospects • ${demographics.dataSource} data`;
     }
     
-    function updateMarketIntelligence(marketData) {
+    function updatePracticeQuality(marketData) {
+      document.getElementById('avgPracticeRating').textContent = marketData.avgRating.toFixed(1);
+      document.getElementById('highRatedCount').textContent = marketData.highRated;
+      document.getElementById('lowRatedCount').textContent = marketData.lowRated;
+      document.getElementById('newPractices').textContent = marketData.newPractices;
+      
+      const qualityPercent = marketData.totalPractices > 0 ? 
+        (marketData.highRated / marketData.totalPractices * 100).toFixed(0) : 0;
+      
+      document.getElementById('qualityMeta').textContent = 
+        `${qualityPercent}% of practices rated 4.0+ stars • Quality competitive advantage opportunity`;
+    }
+    
+    function updateDigitalMarketing(marketData) {
+      const withAds = marketData.withMetaAds;
+      const withWebsites = marketData.withWebsites;
+      const totalPractices = marketData.totalPractices;
+      
+      const digitalGap = totalPractices - withAds;
+      const marketingOpportunity = totalPractices - Math.max(withAds, withWebsites);
+      
+      document.getElementById('practicesWithAds').textContent = withAds;
+      document.getElementById('practicesWithWebsites').textContent = withWebsites;
+      document.getElementById('digitalGap').textContent = digitalGap;
+      document.getElementById('marketingOpportunity').textContent = marketingOpportunity;
+      
+      const adPercent = totalPractices > 0 ? (withAds / totalPractices * 100).toFixed(0) : 0;
+      
+      document.getElementById('digitalMeta').textContent = 
+        `${adPercent}% actively advertising • ${digitalGap} practices not advertising online`;
+    }
       const penetrationPercent = (marketData.penetrationRate * 100).toFixed(0);
       document.getElementById('penetrationRate').textContent = `${penetrationPercent}%`;
       document.getElementById('avgRating').textContent = marketData.avgRating.toFixed(1);
@@ -1175,11 +1283,6 @@ ${getStrategicRecommendations(marketData, demographics)}`;
       document.getElementById('filterMetaAds').addEventListener('click', () => {
         toggleFilter('metaAdsOnly');
       });
-      
-      // Heatmap controls
-      document.getElementById('incomeHeatmap').addEventListener('click', toggleIncomeHeatmap);
-      document.getElementById('ageHeatmap').addEventListener('click', toggleAgeHeatmap);
-      document.getElementById('behaviorHeatmap').addEventListener('click', toggleBehaviorHeatmap);
       
       // Report generation
       document.getElementById('generateReport').addEventListener('click', generateMarketReport);
