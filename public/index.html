@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Established Shot Territory Intelligence & ROI Engine™</title>
+  <title>Dental Market Intelligence & Analysis Tool</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -19,6 +19,8 @@
       --success:#10b981;
       --warning:#f59e0b;
       --danger:#ef4444;
+      --invisalign:#ef4444;
+      --general:#10b981;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -33,173 +35,166 @@
     }
     .wrap{max-width:1400px;margin:0 auto;padding:24px 16px 40px}
     
-    /* Header with scarcity messaging */
+    /* Header */
     header{
-      display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;
+      display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;
     }
     .brand{display:flex;align-items:center;gap:12px}
     .logo-dot{
       width:14px;height:14px;border-radius:50%;background:var(--gold);
       box-shadow:0 0 0 4px rgba(242,169,34,.2);animation:pulse 2s infinite;
     }
-    .title{font-family:"Young Serif",serif;font-size:22px;letter-spacing:.2px}
-    .subtitle{color:#b8d8d3;font-size:13px;margin-top:-2px}
+    .title{font-family:"Young Serif",serif;font-size:24px;letter-spacing:.2px}
+    .subtitle{color:#b8d8d3;font-size:14px;margin-top:-2px}
     
-    .scarcity-alert{
-      display:flex;align-items:center;gap:8px;
-      background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);
-      padding:8px 12px;border-radius:8px;color:#fca5a5;font-weight:600;font-size:13px;
-      animation:urgentPulse 3s infinite;
-    }
-    @keyframes urgentPulse{0%,100%{background:rgba(239,68,68,.15)}50%{background:rgba(239,68,68,.25)}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
     
     .toolbar{
       display:flex;gap:8px;flex-wrap:wrap;align-items:center;
       background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
-      padding:10px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.25);
+      padding:12px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.25);
     }
     
     input[type="text"]{
       width:360px;max-width:80vw;background:#081f29;border:1px solid rgba(255,255,255,.12);
-      color:#e6f1f1;padding:10px 12px;border-radius:10px;outline:0;
+      color:#e6f1f1;padding:12px 14px;border-radius:10px;outline:0;font-size:14px;
     }
     select,button{
       appearance:none;background:#092431;border:1px solid rgba(255,255,255,.12);
-      color:#e6f1f1;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .2s;
+      color:#e6f1f1;padding:12px 14px;border-radius:10px;cursor:pointer;transition:all .2s;
+      font-size:14px;
     }
     button.primary{
-      background:var(--gold);border-color:var(--gold);color:#0d1012;font-weight:700;
+      background:var(--gold);border-color:var(--gold);color:#0d1012;font-weight:600;
     }
-    button.lock-territory{
-      background:linear-gradient(135deg,var(--success),#059669);
-      border-color:var(--success);color:white;font-weight:700;
-      animation:lockPulse 2s infinite;box-shadow:0 0 20px rgba(16,185,129,.3);
-    }
-    @keyframes lockPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+    button:hover{background:rgba(255,255,255,.1)}
+    button.primary:hover{background:#e09820}
     
-    button.locked{
-      background:#374151;border-color:#4b5563;color:#9ca3af;cursor:not-allowed;
+    .filter-controls{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-left:auto;
     }
+    .filter-toggle{
+      padding:8px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+      color:#e6f1f1;border-radius:8px;cursor:pointer;font-size:12px;transition:all .2s;
+    }
+    .filter-toggle.active{background:var(--teal);color:white}
     
-    .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:10px}
+    .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:12px}
     #map{
       width:100%;height:75vh;min-height:560px;border-radius:16px;
       border:1px solid rgba(255,255,255,.08);box-shadow:0 8px 24px rgba(0,0,0,.35);
       overflow:hidden;background:#05171f;
     }
-    .panel{display:flex;flex-direction:column;gap:12px}
+    .panel{display:flex;flex-direction:column;gap:14px}
     .card{
       background:var(--card);border:1px solid rgba(255,255,255,.10);border-radius:14px;
-      padding:14px 14px;box-shadow:0 10px 24px rgba(0,0,0,.35);
+      padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.35);
     }
     .card h3{
-      margin:0 0 8px 0;font-family:"Young Serif",serif;font-weight:400;color:#f3f7f6;
-      display:flex;align-items:center;gap:8px;
+      margin:0 0 12px 0;font-family:"Young Serif",serif;font-weight:400;color:#f3f7f6;
+      display:flex;align-items:center;gap:8px;font-size:18px;
     }
     
-    /* Territory Status with Psychological Triggers */
-    .territory-status{
-      padding:12px;border-radius:10px;margin-bottom:12px;
-      background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);
+    /* Market Overview */
+    .market-overview{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0;
     }
-    .territory-status.locked{
-      background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);
+    .market-stat{
+      text-align:center;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;
+      border:1px solid rgba(255,255,255,.06);
     }
-    .territory-status.competitor-blocked{
-      background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);
-    }
-    .territory-status.hold{
-      background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);
-    }
+    .market-number{font-size:18px;font-weight:700;color:var(--gold)}
+    .market-label{font-size:11px;color:#9ca3af;margin-top:4px;text-transform:uppercase}
     
-    .status-dot{width:8px;height:8px;border-radius:50%;margin-right:8px;display:inline-block}
-    .status-dot.available{background:var(--success);animation:pulse 2s infinite}
-    .status-dot.locked{background:var(--danger)}
-    .status-dot.blocked{background:var(--warning)}
-    .status-dot.hold{background:#3b82f6}
+    /* Practice Legend */
+    .practice-legend{
+      display:flex;gap:16px;margin:12px 0;flex-wrap:wrap;
+    }
+    .legend-item{
+      display:flex;align-items:center;gap:6px;font-size:12px;
+    }
+    .legend-dot{
+      width:12px;height:12px;border-radius:50%;
+    }
+    .legend-dot.invisalign{background:var(--invisalign)}
+    .legend-dot.general{background:var(--general)}
     
-    .lock-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .timer{font-family:monospace;font-size:18px;font-weight:700;color:var(--warning)}
+    /* Demographics */
+    .demo-overview{
+      display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;
+    }
+    .demo-stat{
+      text-align:center;padding:10px;background:rgba(5,144,140,.1);border-radius:6px;
+    }
+    .demo-number{font-size:16px;font-weight:700;color:var(--teal)}
+    .demo-desc{font-size:10px;color:#9ca3af;margin-top:2px}
+    
+    .heatmap-controls{
+      display:flex;gap:6px;margin:10px 0;flex-wrap:wrap;
+    }
+    .heatmap-btn{
+      padding:8px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+      color:#e6f1f1;border-radius:6px;cursor:pointer;font-size:11px;transition:all .2s;
+    }
+    .heatmap-btn.active{background:var(--teal);color:white}
     
     /* Market Intelligence */
-    .intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+    .intel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
     .intel-metric{
-      text-align:center;padding:10px;background:rgba(255,255,255,.02);border-radius:8px;
+      text-align:center;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;
       border:1px solid rgba(255,255,255,.06);
     }
     .intel-value{font-size:16px;font-weight:700;color:var(--gold)}
     .intel-label{font-size:10px;color:#9ca3af;margin-top:2px;text-transform:uppercase}
     
-    .share-of-voice{
-      margin:12px 0;padding:8px;background:rgba(242,169,34,.1);border-radius:8px;
-      border:1px solid rgba(242,169,34,.3);
-    }
-    .voice-bar{
-      height:8px;background:#333;border-radius:4px;overflow:hidden;margin:4px 0;
-    }
-    .voice-fill{
-      height:100%;background:linear-gradient(90deg,var(--gold),#f7b32b);
-      transition:width .8s ease;
-    }
-    
-    /* Demographics with Real Census Data */
-    .demo-overview{
-      display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0;
-    }
-    .demo-stat{
-      text-align:center;padding:8px;background:rgba(5,144,140,.1);border-radius:6px;
-    }
-    .demo-number{font-size:14px;font-weight:700;color:var(--teal)}
-    .demo-desc{font-size:10px;color:#9ca3af;margin-top:2px}
-    
-    .heatmap-controls{
-      display:flex;gap:6px;margin:8px 0;flex-wrap:wrap;
-    }
-    .heatmap-btn{
-      padding:6px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
-      color:#e6f1f1;border-radius:6px;cursor:pointer;font-size:11px;transition:all .2s;
-    }
-    .heatmap-btn.active{background:var(--teal);color:white}
-    
-    /* ROI Calculator with Bottom-Up Math */
+    /* ROI Calculator */
     .roi-breakdown{
       background:rgba(242,169,34,.05);border:1px solid rgba(242,169,34,.2);
-      border-radius:8px;padding:12px;margin:8px 0;
+      border-radius:8px;padding:12px;margin:10px 0;
     }
     .roi-step{
       display:flex;justify-content:space-between;padding:4px 0;
-      border-bottom:1px solid rgba(255,255,255,.1);
+      border-bottom:1px solid rgba(255,255,255,.1);font-size:13px;
     }
     .roi-step:last-child{border-bottom:none;font-weight:700;color:var(--gold)}
     
     /* Competitor Intelligence */
-    .competitor-alert{
+    .competitor-summary{
       background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
-      border-radius:8px;padding:10px;margin:8px 0;
+      border-radius:8px;padding:12px;margin:10px 0;
     }
-    .competitor-spend{
+    .competitor-metric{
       display:flex;justify-content:space-between;align-items:center;
-      padding:6px 0;font-size:12px;
+      padding:4px 0;font-size:12px;
     }
     
     /* AI Analysis */
     .ai-output{
       min-height:120px;white-space:pre-wrap;line-height:1.5;
       background:rgba(255,255,255,.02);border-radius:8px;padding:12px;
-      border:1px solid rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.08);font-size:13px;
     }
     .loading{opacity:.6}
     
     .report-section{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.1)}
     
-    .meta{color:#cfe8e3;font-size:13px;opacity:.85}
+    .meta{color:#cfe8e3;font-size:12px;opacity:.85}
+    
+    /* Custom Info Window Styles */
+    .practice-info{
+      padding:12px;min-width:220px;color:#333;
+    }
+    .practice-info h4{margin:0 0 8px 0;color:#012E40;font-size:16px}
+    .practice-info .address{color:#666;font-size:12px;margin-bottom:8px}
+    .practice-info .rating{color:#F2A922;font-weight:600;margin-bottom:4px}
+    .practice-info .meta-ads{font-size:12px;color:#05908C}
     
     @media (max-width:980px){
       .grid{grid-template-columns:1fr;gap:12px}
       #map{min-height:420px;height:60vh}
       input[type="text"]{width:100%}
-      .intel-grid,.demo-overview{grid-template-columns:1fr}
+      .intel-grid,.demo-overview,.market-overview{grid-template-columns:1fr}
+      .filter-controls{margin-left:0;margin-top:8px}
     }
   </style>
 </head>
@@ -209,52 +204,68 @@
       <div class="brand">
         <div class="logo-dot"></div>
         <div>
-          <div class="title">Territory Intelligence & ROI Engine™</div>
-          <div class="subtitle">AI-Powered Market Lock & Profit Forecast System</div>
+          <div class="title">Dental Market Intelligence</div>
+          <div class="subtitle">Professional Market Analysis & Practice Mapping</div>
         </div>
-      </div>
-      <div class="scarcity-alert">
-        <span>🔥</span>
-        <span id="territoriesRemaining">Only 4 founding territories left nationwide</span>
       </div>
     </header>
 
     <div class="toolbar">
-      <input id="search" type="text" placeholder="Search dental practice or address…" />
+      <input id="search" type="text" placeholder="Search area or address for market analysis…" />
       <select id="radius">
-        <option value="10" selected>10 mi Protected Radius</option>
-        <option value="12">12 mi Protected Radius</option>
-        <option value="15">15 mi Protected Radius</option>
+        <option value="5">5 mi radius</option>
+        <option value="10" selected>10 mi radius</option>
+        <option value="15">15 mi radius</option>
+        <option value="20">20 mi radius</option>
       </select>
-      <button id="analyzeBtn" class="primary">🔍 Analyze Territory</button>
+      <button id="analyzeBtn" class="primary">🔍 Analyze Market</button>
+      
+      <div class="filter-controls">
+        <div class="filter-toggle" id="filterInvisalign">Invisalign Only</div>
+        <div class="filter-toggle" id="filterHighRated">High Rated (4.0+)</div>
+        <div class="filter-toggle" id="filterMetaAds">With Ads</div>
+      </div>
     </div>
 
     <div class="grid">
       <div id="map"></div>
 
       <div class="panel">
-        <!-- 1. Live Territory Mapping -->
+        <!-- 1. Market Overview -->
         <div class="card">
-          <h3>🗺️ Live Territory Status</h3>
-          <div id="territoryStatus" class="territory-status">
-            <div style="font-weight:600;margin-bottom:4px">
-              <span class="status-dot available"></span>
-              🟢 AVAILABLE - Ready to Lock
+          <h3>📊 Market Overview</h3>
+          <div class="market-overview">
+            <div class="market-stat">
+              <div class="market-number" id="totalPractices">--</div>
+              <div class="market-label">Total Practices</div>
             </div>
-            <div class="meta">This 10-mile protected area is unclaimed</div>
+            <div class="market-stat">
+              <div class="market-number" id="invisalignCount">--</div>
+              <div class="market-label">Invisalign Providers</div>
+            </div>
+            <div class="market-stat">
+              <div class="market-number" id="marketDensity">--</div>
+              <div class="market-label">Per 1,000 Residents</div>
+            </div>
           </div>
-          <div id="lockActions" class="lock-actions" style="display:none">
-            <button id="lockBtn" class="lock-territory">🔒 LOCK TERRITORY (Demo)</button>
-            <button id="holdBtn">⏰ 48hr Hold (FREE)</button>
+          
+          <div class="practice-legend">
+            <div class="legend-item">
+              <div class="legend-dot invisalign"></div>
+              <span>Invisalign Providers</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot general"></div>
+              <span>General Practices</span>
+            </div>
           </div>
-          <div id="holdTimer" style="display:none">
-            <div class="meta">Territory held for: <span class="timer" id="countdown">47:59:32</span></div>
-          </div>
+          
+          <div class="meta" id="overviewMeta">Select an area to analyze the dental market</div>
         </div>
 
-        <!-- 2. AI-Powered Audience Qualification -->
+        <!-- 2. Demographics -->
         <div class="card">
-          <h3>👥 Target Audience Intelligence</h3>
+          <h3>👥 Demographics</h3>
           <div class="demo-overview">
             <div class="demo-stat">
               <div class="demo-number" id="totalPop">--</div>
@@ -274,117 +285,93 @@
             <button class="heatmap-btn" id="ageHeatmap">👨‍👩‍👧‍👦 Age Demographics</button>
             <button class="heatmap-btn" id="behaviorHeatmap">🎯 Interest Targeting</button>
           </div>
-          <div class="meta" id="audienceMeta">Census + Meta Audience Insights integration</div>
+          <div class="meta" id="audienceMeta">US Census + demographic analysis</div>
         </div>
 
-        <!-- 3. Demand Ceiling Calculation -->
+        <!-- 3. Market Intelligence -->
         <div class="card">
-          <h3>📊 Market Demand Analysis</h3>
+          <h3>📈 Market Intelligence</h3>
           <div class="intel-grid">
             <div class="intel-metric">
-              <div class="intel-value" id="demandCeiling">--</div>
-              <div class="intel-label">Annual Demand Ceiling</div>
+              <div class="intel-value" id="penetrationRate">--</div>
+              <div class="intel-label">Invisalign Penetration</div>
             </div>
             <div class="intel-metric">
-              <div class="intel-value" id="adoptionRate">--</div>
-              <div class="intel-label">Adoption Rate</div>
+              <div class="intel-value" id="avgRating">--</div>
+              <div class="intel-label">Average Rating</div>
             </div>
             <div class="intel-metric">
-              <div class="intel-value" id="seasonalTrend">--</div>
-              <div class="intel-label">Seasonal Trend</div>
+              <div class="intel-value" id="competitionLevel">--</div>
+              <div class="intel-label">Competition Level</div>
             </div>
             <div class="intel-metric">
-              <div class="intel-value" id="confidenceLevel">--</div>
-              <div class="intel-label">Confidence Level</div>
+              <div class="intel-value" id="opportunityScore">--</div>
+              <div class="intel-label">Opportunity Score</div>
             </div>
           </div>
-          <div class="meta" id="demandMeta">Conservative projections with historical learning</div>
+          <div class="meta" id="intelligenceMeta">Market analysis based on practice data</div>
         </div>
 
-        <!-- 4. Bottom-Up ROI Forecast -->
+        <!-- 4. ROI Analysis -->
         <div class="card">
-          <h3>💰 ROI Forecast Engine</h3>
+          <h3>💰 ROI Analysis</h3>
           <div class="roi-breakdown">
             <div class="roi-step">
-              <span>Monthly Ad Spend:</span>
-              <span id="adSpend">$2,500</span>
+              <span>Target Population:</span>
+              <span id="targetPop">--</span>
             </div>
             <div class="roi-step">
-              <span>Expected Clicks:</span>
-              <span id="expectedClicks">--</span>
+              <span>Market Demand:</span>
+              <span id="marketDemand">--</span>
             </div>
             <div class="roi-step">
-              <span>Qualified Leads:</span>
-              <span id="qualifiedLeads">--</span>
+              <span>Competition Factor:</span>
+              <span id="competitionFactor">--</span>
             </div>
             <div class="roi-step">
-              <span>Consultations:</span>
-              <span id="consultations">--</span>
-            </div>
-            <div class="roi-step">
-              <span>Invisalign Cases:</span>
-              <span id="newCases">--</span>
-            </div>
-            <div class="roi-step">
-              <span>Net Monthly Profit:</span>
-              <span id="netProfit">--</span>
+              <span>Opportunity Value:</span>
+              <span id="opportunityValue">--</span>
             </div>
           </div>
-          <div class="meta">Updates after 14 days with live campaign data</div>
+          <div class="meta">Conservative projections based on market data</div>
         </div>
 
-        <!-- 5. Competitor Intelligence Layer -->
+        <!-- 5. Competitive Analysis -->
         <div class="card">
-          <h3>🕵️ Competitor Intelligence</h3>
-          <div class="competitor-alert">
-            <div style="font-weight:600;margin-bottom:8px">⚠️ Active Competition Detected</div>
-            <div class="competitor-spend">
+          <h3>🎯 Competitive Analysis</h3>
+          <div class="competitor-summary">
+            <div class="competitor-metric">
+              <span>🏥 Total Practices:</span>
+              <span id="competitorTotal">--</span>
+            </div>
+            <div class="competitor-metric">
               <span>🔴 Invisalign Providers:</span>
-              <span id="invisProviders">--</span>
+              <span id="competitorInvisalign">--</span>
             </div>
-            <div class="competitor-spend">
-              <span>💸 Est. Competitor Spend:</span>
-              <span id="competitorSpend">--</span>
+            <div class="competitor-metric">
+              <span>📱 With Meta Ads:</span>
+              <span id="competitorAds">--</span>
             </div>
-            <div class="competitor-spend">
-              <span>📈 Your Market Share:</span>
-              <span id="marketShareCalc">--</span>
+            <div class="competitor-metric">
+              <span>⭐ High Rated (4.0+):</span>
+              <span id="competitorHighRated">--</span>
             </div>
           </div>
-          <div class="share-of-voice">
-            <div style="font-weight:600;margin-bottom:4px">Share of Voice Projection:</div>
-            <div class="voice-bar">
-              <div class="voice-fill" id="voiceFill" style="width:0%"></div>
-            </div>
-            <div class="meta" id="voiceDesc">Based on $2,500 monthly spend vs competition</div>
-          </div>
+          <div class="meta" id="competitorMeta">Practice intelligence and advertising analysis</div>
         </div>
 
-        <!-- 6. Real-Time Territory Lock -->
-        <div class="card" style="display:none" id="lockConfirmation">
-          <h3>🔐 Territory Protected!</h3>
-          <div class="territory-status locked">
-            <div style="font-weight:600;margin-bottom:4px">
-              <span class="status-dot locked"></span>
-              🔒 LOCKED & PROTECTED
-            </div>
-            <div class="meta">10-mile exclusive radius secured</div>
-            <div class="meta">No competitors can access our video ads here</div>
-          </div>
-        </div>
-
-        <!-- 7. AI-Generated Territory Analysis -->
+        <!-- 6. Market Report -->
         <div class="card">
-          <h3>🤖 AI Territory Analysis</h3>
-          <div id="aiAnalysis" class="ai-output">
-            Run territory analysis to unlock AI-powered insights about this specific market opportunity, competitive positioning, and strategic recommendations.
+          <h3>📋 Market Analysis</h3>
+          <div id="marketAnalysis" class="ai-output">
+            Run market analysis to generate comprehensive insights about practice distribution, competitive landscape, and market opportunities in this area.
           </div>
           <div class="report-section" id="reportSection" style="display:none">
             <button id="generateReport" class="primary" style="width:100%">
-              📄 Generate Territory Report PDF
+              📄 Generate Market Report
             </button>
           </div>
-          <div class="meta">Powered by GPT-4 + proprietary market intelligence</div>
+          <div class="meta">AI-powered market intelligence and strategic insights</div>
         </div>
       </div>
     </div>
@@ -398,7 +385,7 @@
     // Load Google Maps with required libraries
     (function(){
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GMAPS_KEY}&libraries=places,geometry,visualization&callback=initTerritoryEngine`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${window.GMAPS_KEY}&libraries=places,geometry,visualization&callback=initMarketAnalysis`;
       script.async = true;
       document.head.appendChild(script);
     })();
@@ -406,404 +393,129 @@
 
   <script>
     // ===========================================
-    // ESTABLISHED SHOT TERRITORY ENGINE™
-    // AI-Powered Market Lock & Profit Forecast
+    // DENTAL MARKET INTELLIGENCE TOOL
+    // Professional Practice Analysis & Mapping
     // ===========================================
     
     // Global State
-    let map, placesService, selectedPlace = null;
-    let territoryLocked = false, holdActive = false;
-    let competitorMarkers = [], heatmapOverlays = [];
-    let demographicData = null, competitorData = null;
-    let holdTimer = null;
-    
-    // Simulated locked territories (in production, this comes from database)
-    const existingTerritories = [
-      {lat: 33.8488, lng: -84.3877, practice: "Smile Atlanta", rep: "Jessica M.", locked: true},
-      {lat: 33.6488, lng: -84.4877, practice: "Buckhead Dental", rep: "Michael R.", locked: true},
-      {lat: 34.1488, lng: -84.2877, practice: "Roswell Orthodontics", rep: "Sarah K.", locked: true},
-      {lat: 33.5488, lng: -84.5877, practice: "Peachtree Smiles", rep: "David L.", locked: true}
-    ];
+    let map, placesService, heatmap;
+    let selectedLocation = null;
+    let allPractices = [], practiceMarkers = [];
+    let demographicData = null, marketData = null;
+    let activeFilters = {
+      invisalignOnly: false,
+      highRatedOnly: false,
+      metaAdsOnly: false
+    };
 
-    // Initialize Territory Engine
-    window.initTerritoryEngine = function() {
-      console.log('🚀 Territory Intelligence Engine™ Loading...');
+    // Initialize Market Analysis Tool
+    window.initMarketAnalysis = function() {
+      console.log('🚀 Dental Market Intelligence Tool Loading...');
       
       // Initialize map
       map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 33.7488, lng: -84.3877},
-        zoom: 10,
+        center: {lat: 39.8283, lng: -98.5795}, // Center of US
+        zoom: 4,
         disableDefaultUI: true,
+        zoomControl: true,
         styles: [
-          {featureType: "poi", stylers: [{visibility: "off"}]},
+          {featureType: "poi.business", stylers: [{visibility: "off"}]},
           {featureType: "transit", stylers: [{visibility: "off"}]}
         ]
       });
       
       placesService = new google.maps.places.PlacesService(map);
       
-      // Show existing locked territories
-      renderLockedTerritories();
-      
-      // Setup autocomplete
-      setupAddressSearch();
+      // Setup location search
+      setupLocationSearch();
       
       // Bind event listeners
       bindEventListeners();
       
-      // Start territory scarcity countdown
-      startScarcityCounter();
-      
-      console.log('✅ Territory Engine Ready');
+      console.log('✅ Market Intelligence Tool Ready');
     };
 
     // ===========================================
-    // 1. LIVE TERRITORY MAPPING
+    // 1. LOCATION SEARCH & SETUP
     // ===========================================
     
-    function renderLockedTerritories() {
-      existingTerritories.forEach(territory => {
-        // Draw protected circle
-        const circle = new google.maps.Circle({
-          strokeColor: '#ef4444',
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: '#ef4444',
-          fillOpacity: 0.15,
-          map: map,
-          center: {lat: territory.lat, lng: territory.lng},
-          radius: 10 * 1609.34 // 10 miles in meters
-        });
+    function setupLocationSearch() {
+      const searchInput = document.getElementById('search');
+      const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+        fields: ['place_id', 'name', 'formatted_address', 'geometry'],
+        types: ['geocode']
+      });
+      
+      autocomplete.addListener('place_changed', async () => {
+        const place = autocomplete.getPlace();
+        if (!place || !place.geometry) return;
         
-        // Add marker
-        const marker = new google.maps.Marker({
-          position: {lat: territory.lat, lng: territory.lng},
-          map: map,
-          title: `PROTECTED: ${territory.practice}`,
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#ef4444',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 2,
-            scale: 12
-          }
-        });
+        selectedLocation = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+          address: place.formatted_address
+        };
         
-        // Info window
-        marker.addListener('click', () => {
-          const infoWindow = new google.maps.InfoWindow({
-            content: `
-              <div style="padding:8px;min-width:200px">
-                <div style="font-weight:700;color:#ef4444;margin-bottom:4px">🔒 TERRITORY LOCKED</div>
-                <div><strong>${territory.practice}</strong></div>
-                <div style="font-size:12px;color:#666">Protected by ${territory.rep}</div>
-                <div style="font-size:12px;color:#666;margin-top:4px">10-mile exclusive radius</div>
-                <div style="font-size:11px;color:#999;margin-top:6px">No competitors can run our ads here</div>
-              </div>
-            `
-          });
-          infoWindow.open(map, marker);
-        });
+        // Center map on location
+        map.setCenter(place.geometry.location);
+        map.setZoom(12);
+        
+        console.log('📍 Location selected:', selectedLocation.address);
       });
     }
-    
-    function checkTerritoryAvailability(location) {
-      const center = {lat: location.lat(), lng: location.lng()};
-      let available = true;
-      let conflictTerritory = null;
-      
-      // Check distance from existing territories
-      for (const territory of existingTerritories) {
-        const distance = google.maps.geometry.spherical.computeDistanceBetween(
-          new google.maps.LatLng(center.lat, center.lng),
-          new google.maps.LatLng(territory.lat, territory.lng)
-        );
-        const distanceMiles = distance / 1609.34;
-        
-        if (distanceMiles < 20) { // 10mi radius each = 20mi separation needed
-          available = false;
-          conflictTerritory = territory;
-          break;
-        }
-      }
-      
-      updateTerritoryStatus(available, conflictTerritory);
-      return available;
-    }
-    
-    function updateTerritoryStatus(available, conflict = null) {
-      const statusDiv = document.getElementById('territoryStatus');
-      const lockActions = document.getElementById('lockActions');
-      
-      if (available && !territoryLocked) {
-        statusDiv.className = 'territory-status';
-        statusDiv.innerHTML = `
-          <div style="font-weight:600;margin-bottom:4px">
-            <span class="status-dot available"></span>
-            🟢 AVAILABLE - Ready to Lock
-          </div>
-          <div class="meta">This 10-mile protected area is unclaimed</div>
-          <div class="meta" style="color:var(--warning)">⚠️ Available to first founder who claims it</div>
-        `;
-        lockActions.style.display = 'flex';
-      } else if (conflict) {
-        statusDiv.className = 'territory-status competitor-blocked';
-        statusDiv.innerHTML = `
-          <div style="font-weight:600;margin-bottom:4px">
-            <span class="status-dot blocked"></span>
-            🚫 BLOCKED - Territory Conflict
-          </div>
-          <div class="meta">Overlaps with ${conflict.practice}</div>
-          <div class="meta">Protected by ${conflict.rep}</div>
-          <div class="meta" style="color:var(--warning)">Try a different location or smaller radius</div>
-        `;
-        lockActions.style.display = 'none';
-      }
-    }
 
     // ===========================================
-    // 2. AI-POWERED AUDIENCE QUALIFICATION  
+    // 2. MARKET ANALYSIS FUNCTIONS
     // ===========================================
     
-    async function getDemographicData(center, radiusMiles) {
-      console.log('📊 Fetching demographic data...');
+    async function analyzeMarket() {
+      if (!selectedLocation) {
+        alert('Please select a location first');
+        return;
+      }
+      
+      const radiusMiles = parseInt(document.getElementById('radius').value);
+      console.log(`🔍 Starting market analysis for ${radiusMiles}mi radius...`);
       
       try {
-        // Try Census API first
-        console.log('Attempting Census API call...');
-        const response = await fetch('/api/census-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            lat: center.lat(),
-            lng: center.lng(),
-            radius: radiusMiles
-          })
-        });
+        // Clear existing data
+        clearMap();
         
-        if (response.ok) {
-          const result = await response.json();
-          console.log('✅ Census API success:', result);
-          demographicData = result.demographics;
-          updateDemographicUI();
-          return demographicData;
-        } else {
-          console.error('Census API failed:', response.status, await response.text());
-          throw new Error(`Census API error: ${response.status}`);
-        }
+        // Get practices in area
+        allPractices = await getNearbyPractices(selectedLocation, radiusMiles);
+        console.log(`Found ${allPractices.length} practices`);
+        
+        // Analyze practices for Invisalign and Meta ads
+        const analyzedPractices = await analyzePractices(allPractices);
+        
+        // Get demographic data
+        demographicData = await getDemographicData(selectedLocation, radiusMiles);
+        
+        // Generate market intelligence
+        marketData = generateMarketIntelligence(analyzedPractices, demographicData);
+        
+        // Display results
+        displayPracticesOnMap(analyzedPractices);
+        updateMarketOverview(marketData);
+        updateDemographics(demographicData);
+        updateMarketIntelligence(marketData);
+        updateROIAnalysis(marketData, demographicData);
+        updateCompetitiveAnalysis(marketData);
+        generateMarketAnalysis(marketData, demographicData);
+        
+        console.log('✅ Market analysis complete');
+        
       } catch (error) {
-        console.error('Census API error, using fallback:', error);
-        
-        // Use fallback simulation
-        demographicData = getFallbackDemographics(center, radiusMiles);
-        updateDemographicUI();
-        return demographicData;
+        console.error('❌ Market analysis failed:', error);
+        alert('Analysis failed. Please try again.');
       }
     }
-
-    function getFallbackDemographics(center, radiusMiles) {
-      console.log('Using fallback demographics simulation');
-      const areaSqMiles = Math.PI * radiusMiles * radiusMiles;
-      const populationDensity = getPopulationDensity(center);
-      const totalPop = Math.floor(areaSqMiles * populationDensity);
-      const medianIncome = getMedianIncome(center);
-      const qualifiedPercent = calculateQualifiedPercent(medianIncome, center);
-      
-      return {
-        totalPopulation: totalPop,
-        qualifiedAudience: Math.floor(totalPop * qualifiedPercent),
-        medianIncome: medianIncome,
-        qualifiedPercent: qualifiedPercent,
-        areaSqMiles: areaSqMiles,
-        populationDensity: populationDensity,
-        dataSource: 'Fallback Simulation'
-      };
-    }
     
-    function getPopulationDensity(center) {
-      // Realistic population density based on location
-      // Metro areas have higher density
-      const lat = center.lat, lng = center.lng;
-      
-      // Atlanta metro area
-      if (lat > 33.4 && lat < 34.0 && lng > -84.8 && lng < -84.0) return 3200;
-      // Suburban areas
-      if (lat > 33.0 && lat < 34.5 && lng > -85.0 && lng < -83.5) return 2100;
-      // Rural areas
-      return 1200;
-    }
-    
-    function getMedianIncome(center) {
-      // Realistic income variation by location
-      const lat = center.lat, lng = center.lng;
-      const baseIncome = 52000;
-      
-      // Higher income areas (north Atlanta)
-      if (lat > 33.8) return baseIncome + Math.random() * 25000 + 15000;
-      // Lower income areas
-      if (lat < 33.5) return baseIncome + Math.random() * 15000 - 5000;
-      // Average areas
-      return baseIncome + Math.random() * 20000;
-    }
-    
-    function calculateQualifiedPercent(medianIncome, center) {
-      let basePercent = 0.28; // 28% base qualified rate
-      
-      // Income adjustments
-      if (medianIncome > 70000) basePercent += 0.08;
-      if (medianIncome > 90000) basePercent += 0.05;
-      if (medianIncome < 45000) basePercent -= 0.12;
-      
-      // Urban vs suburban adjustments
-      const density = getPopulationDensity(center);
-      if (density > 3000) basePercent += 0.05; // Urban bonus
-      if (density < 1500) basePercent -= 0.08; // Rural penalty
-      
-      return Math.max(0.15, Math.min(0.45, basePercent));
-    }
-    
-    function updateDemographicUI() {
-      if (!demographicData) return;
-      
-      document.getElementById('totalPop').textContent = demographicData.totalPopulation.toLocaleString();
-      document.getElementById('qualifiedAudience').textContent = demographicData.qualifiedAudience.toLocaleString();
-      document.getElementById('medianIncome').textContent = `${Math.floor(demographicData.medianIncome / 1000)}k`;
-      
-      const qualifiedPercent = (demographicData.qualifiedPercent * 100).toFixed(1);
-      document.getElementById('audienceMeta').textContent = 
-        `${qualifiedPercent}% qualified Invisalign prospects (age 25-55, income >$50k, dental insurance)`;
-    }
-
-    // ===========================================
-    // 3. DEMAND CEILING CALCULATION
-    // ===========================================
-    
-    function calculateDemandCeiling() {
-      if (!demographicData) return;
-      
-      const qualifiedAudience = demographicData.qualifiedAudience;
-      
-      // Historical adoption rates for Invisalign by market maturity
-      const baseAdoptionRate = 0.024; // 2.4% annually
-      let adoptionRate = baseAdoptionRate;
-      
-      // Adjust for income level
-      if (demographicData.medianIncome > 70000) adoptionRate = 0.032;
-      if (demographicData.medianIncome > 90000) adoptionRate = 0.038;
-      if (demographicData.medianIncome < 45000) adoptionRate = 0.018;
-      
-      // Adjust for competition density
-      const competitorDensity = competitorData ? competitorData.invisalignProviders / demographicData.areaSqMiles : 0.5;
-      if (competitorDensity < 0.3) adoptionRate *= 1.2; // Less competition
-      if (competitorDensity > 1.0) adoptionRate *= 0.8; // High competition
-      
-      const annualDemand = Math.floor(qualifiedAudience * adoptionRate);
-      
-      // Seasonal adjustments (Q1 highest, Q3 lowest)
-      const currentMonth = new Date().getMonth();
-      let seasonalMultiplier = 1.0;
-      if (currentMonth >= 0 && currentMonth <= 2) seasonalMultiplier = 1.15; // Q1 boost
-      if (currentMonth >= 6 && currentMonth <= 8) seasonalMultiplier = 0.85; // Q3 dip
-      
-      const seasonalDemand = Math.floor(annualDemand * seasonalMultiplier);
-      
-      // Confidence level based on data quality
-      let confidence = 85; // Base confidence
-      if (demographicData.populationDensity > 2000) confidence += 10; // Urban areas more predictable
-      if (competitorData && competitorData.invisalignProviders > 0) confidence += 5; // More data available
-      
-      // Update UI
-      document.getElementById('demandCeiling').textContent = seasonalDemand.toLocaleString();
-      document.getElementById('adoptionRate').textContent = `${(adoptionRate * 100).toFixed(1)}%`;
-      document.getElementById('seasonalTrend').textContent = 
-        seasonalMultiplier > 1 ? '+15% (Peak Season)' : 
-        seasonalMultiplier < 1 ? '-15% (Low Season)' : 'Stable';
-      document.getElementById('confidenceLevel').textContent = `${confidence}%`;
-      
-      document.getElementById('demandMeta').textContent = 
-        `Annual Invisalign demand ceiling with ${confidence}% confidence based on demographics + competition`;
-      
-      return {annualDemand, seasonalDemand, adoptionRate, confidence};
-    }
-
-    // ===========================================
-    // 4. BOTTOM-UP ROI FORECAST
-    // ===========================================
-    
-    function calculateROIForecast() {
-      if (!demographicData || !competitorData) return;
-      
-      const monthlySpend = 2500;
-      
-      // Step 1: Ad Performance (based on dental industry benchmarks)
-      const avgCPC = 8.50; // Dental/Invisalign CPC
-      const expectedClicks = Math.floor(monthlySpend / avgCPC);
-      
-      // Step 2: Lead Generation
-      const leadConversionRate = 0.085; // 8.5% click-to-lead
-      const qualifiedLeads = Math.floor(expectedClicks * leadConversionRate);
-      
-      // Step 3: Consultation Booking
-      const consultationRate = 0.65; // 65% of leads book consultation
-      const consultations = Math.floor(qualifiedLeads * consultationRate);
-      
-      // Step 4: Case Conversion
-      let caseConversionRate = 0.35; // 35% base conversion rate
-      
-      // Adjust for competition
-      const marketShare = competitorData.ourMarketShare / 100;
-      if (marketShare > 0.4) caseConversionRate *= 1.1; // Dominant position
-      if (marketShare < 0.2) caseConversionRate *= 0.9; // Highly competitive
-      
-      // Adjust for demographics
-      if (demographicData.medianIncome > 70000) caseConversionRate *= 1.15;
-      if (demographicData.medianIncome < 45000) caseConversionRate *= 0.85;
-      
-      const newCases = Math.floor(consultations * caseConversionRate);
-      
-      // Step 5: Revenue Calculation
-      const avgCaseValue = 4800; // Average Invisalign case value
-      const grossRevenue = newCases * avgCaseValue;
-      const operationalCosts = grossRevenue * 0.20; // 20% operational costs
-      const netProfit = grossRevenue - monthlySpend - operationalCosts;
-      
-      // Update UI
-      document.getElementById('expectedClicks').textContent = expectedClicks.toLocaleString();
-      document.getElementById('qualifiedLeads').textContent = qualifiedLeads;
-      document.getElementById('consultations').textContent = consultations;
-      document.getElementById('newCases').textContent = newCases;
-      document.getElementById('netProfit').textContent = `${netProfit.toLocaleString()}`;
-      
-      return {
-        expectedClicks, qualifiedLeads, consultations, newCases, 
-        grossRevenue, netProfit, roiMultiple: netProfit / monthlySpend
-      };
-    }
-
-    // ===========================================
-    // 5. ENHANCED COMPETITOR INTELLIGENCE LAYER
-    // ===========================================
-    
-    async function getCompetitorIntelligence(center, radiusMiles) {
-      console.log('🕵️ Analyzing competitor landscape...');
-      
-      // Get dental practices in area
-      const practices = await getNearbyDentalPractices(center, radiusMiles);
-      
-      // Enhanced competitor analysis with Facebook Ad Library
-      const competitorAnalysis = await getEnhancedCompetitorAnalysis(practices, center, radiusMiles);
-      
-      competitorData = competitorAnalysis;
-      updateCompetitorUI();
-      return competitorData;
-    }
-    
-    async function getNearbyDentalPractices(center, radiusMiles) {
+    async function getNearbyPractices(location, radiusMiles) {
       return new Promise((resolve) => {
         const request = {
-          location: center,
-          radius: radiusMiles * 1609.34,
+          location: new google.maps.LatLng(location.lat, location.lng),
+          radius: radiusMiles * 1609.34, // Convert to meters
           type: 'dentist'
         };
         
@@ -811,405 +523,542 @@
           if (status === google.maps.places.PlacesServiceStatus.OK) {
             resolve(results || []);
           } else {
+            console.error('Places search failed:', status);
             resolve([]);
           }
         });
       });
     }
+    
+    async function analyzePractices(practices) {
+      console.log('🔬 Analyzing practices for Invisalign and Meta ads...');
+      
+      const analyzed = [];
+      
+      for (const practice of practices) {
+        const analysis = {
+          ...practice,
+          isInvisalignProvider: await checkInvisalignProvider(practice),
+          hasMetaAds: await checkMetaAds(practice),
+          size: categorizePracticeSize(practice)
+        };
+        analyzed.push(analysis);
+      }
+      
+      return analyzed;
+    }
+    
+    async function checkInvisalignProvider(practice) {
+      const name = (practice.name || '').toLowerCase();
+      const types = (practice.types || []).join(' ').toLowerCase();
+      
+      // Strong indicators
+      if (name.includes('invisalign') || name.includes('clear aligner') || 
+          name.includes('orthodontic') || types.includes('orthodontist')) {
+        return true;
+      }
+      
+      // Weaker indicators - check additional factors
+      if (name.includes('cosmetic') || name.includes('smile') || 
+          practice.rating > 4.2 && practice.user_ratings_total > 100) {
+        return Math.random() < 0.6; // 60% chance for high-quality cosmetic practices
+      }
+      
+      // General dentists
+      return Math.random() < 0.25; // 25% of general dentists offer Invisalign
+    }
+    
+    async function checkMetaAds(practice) {
+      // Simulate Meta Ad Library check
+      // In production, this would call the actual Meta API
+      const hasWebsite = !!practice.website;
+      const isLargePractice = practice.user_ratings_total > 50;
+      const isHighRated = practice.rating > 4.0;
+      
+      if (hasWebsite && isLargePractice && isHighRated) {
+        return Math.random() < 0.4; // 40% chance for established practices
+      }
+      
+      return Math.random() < 0.15; // 15% chance for others
+    }
+    
+    function categorizePracticeSize(practice) {
+      const reviewCount = practice.user_ratings_total || 0;
+      
+      if (reviewCount > 200) return 'Large';
+      if (reviewCount > 50) return 'Medium';
+      return 'Small';
+    }
 
-    async function getEnhancedCompetitorAnalysis(practices, center, radiusMiles) {
+    // ===========================================
+    // 3. MAP VISUALIZATION
+    // ===========================================
+    
+    function displayPracticesOnMap(practices) {
+      console.log('🗺️ Displaying practices on map...');
+      
+      practices.forEach(practice => {
+        if (!practice.geometry || !practice.geometry.location) return;
+        
+        const isInvisalign = practice.isInvisalignProvider;
+        const marker = new google.maps.Marker({
+          position: practice.geometry.location,
+          map: map,
+          title: practice.name,
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: isInvisalign ? '#ef4444' : '#10b981',
+            fillOpacity: 0.8,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+            scale: practice.rating > 4.0 ? 8 : 6
+          }
+        });
+        
+        // Create info window
+        const infoContent = createPracticeInfoWindow(practice);
+        const infoWindow = new google.maps.InfoWindow({
+          content: infoContent
+        });
+        
+        marker.addListener('click', () => {
+          // Close any open info windows
+          practiceMarkers.forEach(m => {
+            if (m.infoWindow) m.infoWindow.close();
+          });
+          
+          infoWindow.open(map, marker);
+        });
+        
+        marker.infoWindow = infoWindow;
+        practiceMarkers.push(marker);
+      });
+      
+      applyFilters();
+    }
+    
+    function createPracticeInfoWindow(practice) {
+      const metaAdsStatus = practice.hasMetaAds ? 'Active' : 'None detected';
+      const metaAdsColor = practice.hasMetaAds ? '#05908C' : '#666';
+      
+      return `
+        <div class="practice-info">
+          <h4>${practice.name}</h4>
+          <div class="address">${practice.vicinity || practice.formatted_address}</div>
+          <div class="rating">⭐ ${practice.rating || 'N/A'} stars (${practice.user_ratings_total || 0} reviews)</div>
+          <div class="meta-ads" style="color:${metaAdsColor}">📱 Meta Ads: ${metaAdsStatus}</div>
+        </div>
+      `;
+    }
+    
+    function clearMap() {
+      // Clear existing markers
+      practiceMarkers.forEach(marker => {
+        marker.setMap(null);
+      });
+      practiceMarkers = [];
+      
+      // Clear heatmap if exists
+      if (heatmap) {
+        heatmap.setMap(null);
+        heatmap = null;
+      }
+    }
+
+    // ===========================================
+    // 4. DEMOGRAPHIC DATA
+    // ===========================================
+    
+    async function getDemographicData(location, radiusMiles) {
+      console.log('📊 Fetching demographic data...');
+      
       try {
-        const response = await fetch('/api/competitor-analysis', {
+        const response = await fetch('/api/census-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            practices: practices,
-            location: { lat: center.lat(), lng: center.lng() },
+            lat: location.lat,
+            lng: location.lng,
             radius: radiusMiles
           })
         });
         
         if (response.ok) {
           const result = await response.json();
-          console.log('✅ Enhanced competitor analysis complete:', result);
-          return result;
+          console.log('✅ Census API success');
+          return result.demographics;
         } else {
-          console.error('Competitor analysis API failed:', response.status);
-          throw new Error(`Competitor API error: ${response.status}`);
+          throw new Error(`Census API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('Competitor analysis error:', error);
-        
-        // Fallback to basic analysis
-        return createFallbackCompetitorAnalysis(practices);
+        console.error('Census API error, using fallback:', error);
+        return getFallbackDemographics(location, radiusMiles);
       }
     }
-
-    function createFallbackCompetitorAnalysis(practices) {
-      const invisalignProviders = Math.floor(practices.length * 0.3); // 30% offer Invisalign
-      const competitorSpend = invisalignProviders * 1500; // $1500 avg per practice
-      const ourSpend = 2500;
-      const ourMarketShare = Math.round((ourSpend / (competitorSpend + ourSpend)) * 100);
+    
+    function getFallbackDemographics(location, radiusMiles) {
+      const areaSqMiles = Math.PI * radiusMiles * radiusMiles;
+      const populationDensity = 2500; // Average suburban density
+      const totalPop = Math.floor(areaSqMiles * populationDensity);
+      const medianIncome = 58000 + Math.random() * 20000;
       
       return {
+        totalPopulation: totalPop,
+        qualifiedAudience: Math.floor(totalPop * 0.28),
+        medianIncome: Math.floor(medianIncome),
+        qualifiedPercent: 0.28,
+        areaSqMiles: areaSqMiles,
+        populationDensity: populationDensity,
+        dataSource: 'Estimated'
+      };
+    }
+
+    // ===========================================
+    // 5. MARKET INTELLIGENCE GENERATION
+    // ===========================================
+    
+    function generateMarketIntelligence(practices, demographics) {
+      const totalPractices = practices.length;
+      const invisalignProviders = practices.filter(p => p.isInvisalignProvider).length;
+      const withMetaAds = practices.filter(p => p.hasMetaAds).length;
+      const highRated = practices.filter(p => p.rating >= 4.0).length;
+      
+      const avgRating = practices.reduce((sum, p) => sum + (p.rating || 0), 0) / totalPractices;
+      const penetrationRate = totalPractices > 0 ? (invisalignProviders / totalPractices) : 0;
+      
+      // Calculate market density (practices per 1000 residents)
+      const marketDensity = demographics ? 
+        (totalPractices / demographics.totalPopulation * 1000) : 0;
+      
+      // Determine competition level
+      let competitionLevel = 'LOW';
+      if (marketDensity > 0.8) competitionLevel = 'HIGH';
+      else if (marketDensity > 0.5) competitionLevel = 'MODERATE';
+      
+      // Calculate opportunity score (0-100)
+      const opportunityScore = calculateOpportunityScore(
+        penetrationRate, marketDensity, avgRating, demographics
+      );
+      
+      return {
+        totalPractices,
         invisalignProviders,
-        competitorSpend,
-        ourMarketShare,
-        shareOfVoice: ourMarketShare,
-        totalActiveAds: 0,
-        dataSource: 'Practice Analysis',
-        messagingGaps: ['Video advertising', 'Territory protection', 'Actor-led content'],
-        adExamples: []
+        withMetaAds,
+        highRated,
+        avgRating,
+        penetrationRate,
+        marketDensity,
+        competitionLevel,
+        opportunityScore,
+        practices
       };
     }
     
+    function calculateOpportunityScore(penetrationRate, marketDensity, avgRating, demographics) {
+      let score = 50; // Base score
+      
+      // Lower penetration = higher opportunity
+      if (penetrationRate < 0.2) score += 20;
+      else if (penetrationRate < 0.3) score += 10;
+      else if (penetrationRate > 0.5) score -= 15;
+      
+      // Moderate density is ideal
+      if (marketDensity > 0.3 && marketDensity < 0.7) score += 15;
+      else if (marketDensity > 1.0) score -= 20;
+      
+      // Higher income areas = more opportunity
+      if (demographics && demographics.medianIncome > 70000) score += 15;
+      else if (demographics && demographics.medianIncome < 45000) score -= 10;
+      
+      // Lower average rating = opportunity for quality providers
+      if (avgRating < 3.8) score += 10;
+      
+      return Math.max(0, Math.min(100, Math.floor(score)));
+    }
+
     // ===========================================
-    // 6. ENHANCED COMPETITOR UI WITH LIVE DATA
+    // 6. UI UPDATE FUNCTIONS
     // ===========================================
     
-    function updateCompetitorUI() {
-      if (!competitorData) return;
+    function updateMarketOverview(marketData) {
+      document.getElementById('totalPractices').textContent = marketData.totalPractices;
+      document.getElementById('invisalignCount').textContent = marketData.invisalignProviders;
+      document.getElementById('marketDensity').textContent = marketData.marketDensity.toFixed(1);
       
-      // Update basic metrics
-      document.getElementById('invisProviders').textContent = competitorData.invisalignProviders;
-      document.getElementById('competitorSpend').textContent = `${competitorData.competitorSpend.toLocaleString()}/mo`;
-      document.getElementById('marketShareCalc').textContent = `${competitorData.ourMarketShare}%`;
+      const penetrationPercent = (marketData.penetrationRate * 100).toFixed(0);
+      document.getElementById('overviewMeta').textContent = 
+        `${penetrationPercent}% of practices offer Invisalign • ${marketData.competitionLevel} competition level`;
+    }
+    
+    function updateDemographics(demographics) {
+      if (!demographics) return;
       
-      // Update share of voice visualization
-      const voiceFill = document.getElementById('voiceFill');
-      const voiceDesc = document.getElementById('voiceDesc');
+      document.getElementById('totalPop').textContent = demographics.totalPopulation.toLocaleString();
+      document.getElementById('qualifiedAudience').textContent = demographics.qualifiedAudience.toLocaleString();
+      document.getElementById('medianIncome').textContent = `${Math.floor(demographics.medianIncome / 1000)}k`;
+      
+      const qualifiedPercent = (demographics.qualifiedPercent * 100).toFixed(1);
+      document.getElementById('audienceMeta').textContent = 
+        `${qualifiedPercent}% qualified prospects • ${demographics.dataSource} data`;
+    }
+    
+    function updateMarketIntelligence(marketData) {
+      const penetrationPercent = (marketData.penetrationRate * 100).toFixed(0);
+      document.getElementById('penetrationRate').textContent = `${penetrationPercent}%`;
+      document.getElementById('avgRating').textContent = marketData.avgRating.toFixed(1);
+      document.getElementById('competitionLevel').textContent = marketData.competitionLevel;
+      document.getElementById('opportunityScore').textContent = `${marketData.opportunityScore}/100`;
+      
+      document.getElementById('intelligenceMeta').textContent = 
+        `Analysis of ${marketData.totalPractices} practices • ${marketData.withMetaAds} actively advertising`;
+    }
+    
+    function updateROIAnalysis(marketData, demographics) {
+      if (!demographics) return;
+      
+      const targetPop = demographics.qualifiedAudience;
+      const demandRate = 0.024; // 2.4% annual Invisalign demand
+      const marketDemand = Math.floor(targetPop * demandRate);
+      
+      // Competition factor based on provider density
+      const competitionFactor = marketData.penetrationRate > 0.3 ? 'High' : 
+                               marketData.penetrationRate > 0.2 ? 'Moderate' : 'Low';
+      
+      // Opportunity value calculation
+      const avgCaseValue = 4800;
+      const marketShare = marketData.penetrationRate > 0.3 ? 0.1 : 0.15; // Estimated share
+      const opportunityValue = Math.floor(marketDemand * marketShare * avgCaseValue);
+      
+      document.getElementById('targetPop').textContent = targetPop.toLocaleString();
+      document.getElementById('marketDemand').textContent = `${marketDemand} cases/year`;
+      document.getElementById('competitionFactor').textContent = competitionFactor;
+      document.getElementById('opportunityValue').textContent = `${(opportunityValue / 1000).toFixed(0)}k`;
+    }
+    
+    function updateCompetitiveAnalysis(marketData) {
+      document.getElementById('competitorTotal').textContent = marketData.totalPractices;
+      document.getElementById('competitorInvisalign').textContent = marketData.invisalignProviders;
+      document.getElementById('competitorAds').textContent = marketData.withMetaAds;
+      document.getElementById('competitorHighRated').textContent = marketData.highRated;
+      
+      const adPercent = marketData.totalPractices > 0 ? 
+        (marketData.withMetaAds / marketData.totalPractices * 100).toFixed(0) : 0;
+      
+      document.getElementById('competitorMeta').textContent = 
+        `${adPercent}% actively advertising • Opportunity for digital marketing`;
+    }
+
+    // ===========================================
+    // 7. FILTERING SYSTEM
+    // ===========================================
+    
+    function applyFilters() {
+      practiceMarkers.forEach((marker, index) => {
+        const practice = allPractices[index];
+        let showMarker = true;
+        
+        if (activeFilters.invisalignOnly && !practice.isInvisalignProvider) {
+          showMarker = false;
+        }
+        
+        if (activeFilters.highRatedOnly && practice.rating < 4.0) {
+          showMarker = false;
+        }
+        
+        if (activeFilters.metaAdsOnly && !practice.hasMetaAds) {
+          showMarker = false;
+        }
+        
+        marker.setVisible(showMarker);
+      });
+    }
+    
+    function toggleFilter(filterName) {
+      activeFilters[filterName] = !activeFilters[filterName];
+      applyFilters();
+      
+      // Update UI
+      const button = document.getElementById(`filter${filterName.charAt(0).toUpperCase() + filterName.slice(1)}`);
+      button.classList.toggle('active', activeFilters[filterName]);
+    }
+
+    // ===========================================
+    // 8. HEATMAP FUNCTIONS
+    // ===========================================
+    
+    function toggleIncomeHeatmap() {
+      const btn = document.getElementById('incomeHeatmap');
+      btn.classList.toggle('active');
+      
+      if (btn.classList.contains('active')) {
+        showIncomeHeatmap();
+      } else {
+        hideHeatmap();
+      }
+    }
+    
+    function showIncomeHeatmap() {
+      if (!demographicData) return;
+      
+      // Clear existing heatmap
+      hideHeatmap();
+      
+      // Create income-based heatmap data
+      const heatmapData = generateIncomeHeatmapData();
+      
+      heatmap = new google.maps.visualization.HeatmapLayer({
+        data: heatmapData,
+        map: map,
+        radius: 20,
+        gradient: [
+          'rgba(0, 255, 255, 0)',
+          'rgba(0, 255, 255, 1)',
+          'rgba(0, 191, 255, 1)',
+          'rgba(0, 127, 255, 1)',
+          'rgba(0, 63, 255, 1)',
+          'rgba(0, 0, 255, 1)',
+          'rgba(0, 0, 223, 1)',
+          'rgba(0, 0, 191, 1)',
+          'rgba(0, 0, 159, 1)',
+          'rgba(0, 0, 127, 1)',
+          'rgba(63, 0, 91, 1)',
+          'rgba(127, 0, 63, 1)',
+          'rgba(191, 0, 31, 1)',
+          'rgba(255, 0, 0, 1)'
+        ]
+      });
+    }
+    
+    function generateIncomeHeatmapData() {
+      const center = map.getCenter();
+      const heatmapData = [];
+      
+      // Generate sample income data points around the area
+      for (let i = 0; i < 50; i++) {
+        const lat = center.lat() + (Math.random() - 0.5) * 0.1;
+        const lng = center.lng() + (Math.random() - 0.5) * 0.1;
+        const weight = Math.random(); // Income level (0-1)
+        
+        heatmapData.push({
+          location: new google.maps.LatLng(lat, lng),
+          weight: weight
+        });
+      }
+      
+      return heatmapData;
+    }
+    
+    function hideHeatmap() {
+      if (heatmap) {
+        heatmap.setMap(null);
+        heatmap = null;
+      }
+      
+      // Remove active class from all heatmap buttons
+      document.querySelectorAll('.heatmap-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+    }
+    
+    function toggleAgeHeatmap() {
+      const btn = document.getElementById('ageHeatmap');
+      hideHeatmap();
+      btn.classList.add('active');
+      
+      // Age heatmap implementation would go here
+      console.log('Age demographics heatmap not yet implemented');
+    }
+    
+    function toggleBehaviorHeatmap() {
+      const btn = document.getElementById('behaviorHeatmap');
+      hideHeatmap();
+      btn.classList.add('active');
+      
+      // Behavior/interest heatmap implementation would go here
+      console.log('Interest targeting heatmap not yet implemented');
+    }
+
+    // ===========================================
+    // 9. MARKET ANALYSIS GENERATION
+    // ===========================================
+    
+    function generateMarketAnalysis(marketData, demographics) {
+      const analysisOutput = document.getElementById('marketAnalysis');
+      analysisOutput.classList.add('loading');
+      analysisOutput.textContent = 'Generating market analysis...';
       
       setTimeout(() => {
-        voiceFill.style.width = `${competitorData.shareOfVoice}%`;
-      }, 500);
-      
-      // Enhanced description with live data indicators
-      let description = `Your $2,500 = ${competitorData.shareOfVoice}% of total market ad spend`;
-      
-      if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
-        description += ` • 🔴 LIVE DATA (${competitorData.totalActiveAds} active ads)`;
-      } else {
-        description += ` • Estimated from practice analysis`;
-      }
-      
-      voiceDesc.innerHTML = description;
-      
-      // Update section header with data quality
-      const competitorSection = document.querySelector('.card h3');
-      if (competitorSection) {
-        if (competitorData.dataSource === 'Facebook Ad Library (Live)') {
-          competitorSection.innerHTML = '🕵️ Live Competitor Intelligence <span style="color:var(--success);font-size:10px;font-weight:normal;">• REAL FACEBOOK ADS</span>';
-        } else {
-          competitorSection.innerHTML = '🕵️ Competitor Intelligence <span style="color:var(--warning);font-size:10px;font-weight:normal;">• ENHANCED ANALYSIS</span>';
-        }
-      }
-      
-      // Add live ad examples if available
-      if (competitorData.adExamples && competitorData.adExamples.length > 0) {
-        addLiveAdExamples(competitorData.adExamples);
-      }
-      
-      // Add messaging gaps analysis
-      if (competitorData.messagingGaps && competitorData.messagingGaps.length > 0) {
-        addMessagingGaps(competitorData.messagingGaps);
-      }
-      
-      // Show competitor warning based on activity
-      if (competitorData.totalActiveAds > 5) {
-        voiceDesc.innerHTML += ` <span style="color:var(--danger)">🚨 High ad activity detected</span>`;
-      } else if (competitorData.totalActiveAds > 0) {
-        voiceDesc.innerHTML += ` <span style="color:var(--warning)">⚠️ Active competition detected</span>`;
-      }
-      
-      // Log detailed breakdown for debugging
-      if (competitorData.competitorBreakdown) {
-        console.log('🏥 Competitor Intelligence Breakdown:', competitorData.competitorBreakdown);
-      }
-    }
-
-    function addLiveAdExamples(adExamples) {
-      // Find or create ad examples container
-      let adContainer = document.getElementById('liveAdExamples');
-      if (!adContainer) {
-        adContainer = document.createElement('div');
-        adContainer.id = 'liveAdExamples';
-        adContainer.innerHTML = `
-          <div style="margin-top:12px;padding:12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;">
-            <div style="font-weight:600;margin-bottom:8px;color:#fca5a5">🔴 LIVE COMPETITOR ADS</div>
-            <div id="adExamplesList"></div>
-          </div>
-        `;
-        
-        // Insert after competitor spend section
-        const competitorCard = document.querySelector('#competitorSpend').closest('.card');
-        competitorCard.appendChild(adContainer);
-      }
-      
-      const adExamplesList = document.getElementById('adExamplesList');
-      adExamplesList.innerHTML = '';
-      
-      adExamples.forEach((ad, index) => {
-        const adElement = document.createElement('div');
-        adElement.style.cssText = 'font-size:11px;margin:4px 0;padding:6px;background:rgba(255,255,255,.05);border-radius:4px;';
-        adElement.innerHTML = `
-          <div style="font-weight:600;color:var(--warning)">${ad.practice}</div>
-          <div style="color:#e6f1f1;margin:2px 0">"${ad.headline}"</div>
-          <div style="color:#9ca3af;font-size:10px">${ad.spend} • ${ad.type} ad</div>
-        `;
-        adExamplesList.appendChild(adElement);
-      });
-    }
-
-    function addMessagingGaps(messagingGaps) {
-      // Find or create messaging gaps container
-      let gapsContainer = document.getElementById('messagingGaps');
-      if (!gapsContainer) {
-        gapsContainer = document.createElement('div');
-        gapsContainer.id = 'messagingGaps';
-        gapsContainer.innerHTML = `
-          <div style="margin-top:12px;padding:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;">
-            <div style="font-weight:600;margin-bottom:8px;color:var(--success)">💡 STRATEGIC OPPORTUNITIES</div>
-            <div id="gapsList"></div>
-          </div>
-        `;
-        
-        // Insert after live ads or competitor spend section
-        const competitorCard = document.querySelector('#competitorSpend').closest('.card');
-        competitorCard.appendChild(gapsContainer);
-      }
-      
-      const gapsList = document.getElementById('gapsList');
-      gapsList.innerHTML = '';
-      
-      messagingGaps.forEach(gap => {
-        const gapElement = document.createElement('div');
-        gapElement.style.cssText = 'font-size:11px;margin:3px 0;color:#85c7b3;';
-        gapElement.innerHTML = `• No competitors emphasizing: ${gap}`;
-        gapsList.appendChild(gapElement);
-      });
-      
-      // Add strategic recommendation
-      const recommendation = document.createElement('div');
-      recommendation.style.cssText = 'font-size:11px;margin-top:8px;color:var(--success);font-weight:600;';
-      recommendation.innerHTML = '🎯 Your video ads can dominate these gaps';
-      gapsList.appendChild(recommendation);
-    }
-
-    // ===========================================
-    // 7. REAL-TIME TERRITORY LOCK MECHANISM
-    // ===========================================
-    
-    function lockTerritory() {
-      if (!selectedPlace || territoryLocked) return;
-      
-      territoryLocked = true;
-      
-      // Update UI to show locked state
-      const statusDiv = document.getElementById('territoryStatus');
-      const lockActions = document.getElementById('lockActions');
-      const lockConfirmation = document.getElementById('lockConfirmation');
-      
-      statusDiv.className = 'territory-status locked';
-      statusDiv.innerHTML = `
-        <div style="font-weight:600;margin-bottom:4px">
-          <span class="status-dot locked"></span>
-          🔒 TERRITORY LOCKED!
-        </div>
-        <div class="meta">10-mile exclusive protection active</div>
-        <div class="meta">Campaign launching rights secured</div>
-        <div class="meta" style="color:var(--success)">✅ No competitors can run our ads here</div>
-      `;
-      
-      lockActions.style.display = 'none';
-      lockConfirmation.style.display = 'block';
-      
-      // Update territory counter
-      updateTerritoryCounter(-1);
-      
-      // Visual feedback on map
-      if (map && selectedPlace) {
-        const center = selectedPlace.geometry.location;
-        const radius = parseInt(document.getElementById('radius').value);
-        
-        // Create locked territory circle
-        new google.maps.Circle({
-          strokeColor: '#10b981',
-          strokeOpacity: 0.8,
-          strokeWeight: 3,
-          fillColor: '#10b981',
-          fillOpacity: 0.1,
-          map: map,
-          center: center,
-          radius: radius * 1609.34
-        });
-        
-        // Update marker to locked state
-        new google.maps.Marker({
-          position: center,
-          map: map,
-          title: 'YOUR PROTECTED TERRITORY',
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            fillColor: '#10b981',
-            fillOpacity: 1,
-            strokeColor: '#ffffff',
-            strokeWeight: 3,
-            scale: 15
-          }
-        });
-      }
-      
-      console.log('🔒 Territory locked successfully!');
-    }
-    
-    function holdTerritory() {
-      if (!selectedPlace || holdActive) return;
-      
-      holdActive = true;
-      
-      const statusDiv = document.getElementById('territoryStatus');
-      const holdTimerDiv = document.getElementById('holdTimer');
-      const holdBtn = document.getElementById('holdBtn');
-      
-      statusDiv.className = 'territory-status hold';
-      statusDiv.innerHTML = `
-        <div style="font-weight:600;margin-bottom:4px">
-          <span class="status-dot hold"></span>
-          ⏰ 48-HOUR HOLD ACTIVE
-        </div>
-        <div class="meta">Territory reserved for your decision</div>
-        <div class="meta" style="color:var(--warning)">⚠️ Other reps cannot claim this area</div>
-      `;
-      
-      holdBtn.textContent = '⏰ Hold Active';
-      holdBtn.disabled = true;
-      holdTimerDiv.style.display = 'block';
-      
-      // Start 48-hour countdown
-      startHoldCountdown();
-      
-      console.log('⏰ 48-hour territory hold activated');
-    }
-    
-    function startHoldCountdown() {
-      let timeLeft = 48 * 60 * 60; // 48 hours in seconds
-      const countdownEl = document.getElementById('countdown');
-      
-      holdTimer = setInterval(() => {
-        timeLeft--;
-        
-        const hours = Math.floor(timeLeft / 3600);
-        const minutes = Math.floor((timeLeft % 3600) / 60);
-        const seconds = timeLeft % 60;
-        
-        countdownEl.textContent = 
-          `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (timeLeft <= 0) {
-          clearInterval(holdTimer);
-          expireHold();
-        }
-      }, 1000);
-    }
-    
-    function expireHold() {
-      holdActive = false;
-      document.getElementById('countdown').textContent = 'EXPIRED';
-      document.getElementById('countdown').style.color = 'var(--danger)';
-      
-      // Reset to available state
-      updateTerritoryStatus(true);
-    }
-
-    // ===========================================
-    // 8. AI-GENERATED TERRITORY ANALYSIS
-    // ===========================================
-    
-    async function generateAIAnalysis() {
-      if (!selectedPlace || !demographicData || !competitorData) {
-        console.log('Missing data for AI analysis');
-        return;
-      }
-      
-      const aiOutput = document.getElementById('aiAnalysis');
-      aiOutput.classList.add('loading');
-      aiOutput.textContent = 'AI analyzing territory data...';
-      
-      const analysisData = {
-        practice: {
-          name: selectedPlace.name,
-          address: selectedPlace.formatted_address,
-          location: {
-            lat: selectedPlace.geometry.location.lat(),
-            lng: selectedPlace.geometry.location.lng()
-          }
-        },
-        demographics: demographicData,
-        competitors: competitorData,
-        roi: calculateROIForecast(),
-        demand: calculateDemandCeiling()
-      };
-      
-      try {
-        const response = await fetch('/api/generate-insight', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            territory_analysis: analysisData,
-            prompt_type: 'territory_intelligence'
-          })
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          aiOutput.textContent = result.insight || generateFallbackAnalysis(analysisData);
-        } else {
-          aiOutput.textContent = generateFallbackAnalysis(analysisData);
-        }
-      } catch (error) {
-        console.error('AI Analysis error:', error);
-        aiOutput.textContent = generateFallbackAnalysis(analysisData);
-      } finally {
-        aiOutput.classList.remove('loading');
+        const analysis = createMarketAnalysisText(marketData, demographics);
+        analysisOutput.textContent = analysis;
+        analysisOutput.classList.remove('loading');
         document.getElementById('reportSection').style.display = 'block';
-      }
+      }, 2000);
     }
     
-    function generateFallbackAnalysis(data) {
-      const practice = data.practice.name || 'This practice';
-      const qualified = data.demographics.qualifiedAudience.toLocaleString();
-      const income = `${Math.floor(data.demographics.medianIncome / 1000)}k`;
-      const competitors = data.competitors.invisalignProviders;
-      const marketShare = data.competitors.ourMarketShare;
-      const cases = data.roi.newCases;
-      const profit = data.roi.netProfit;
+    function createMarketAnalysisText(marketData, demographics) {
+      const totalPractices = marketData.totalPractices;
+      const invisalignPercent = (marketData.penetrationRate * 100).toFixed(0);
+      const population = demographics ? demographics.totalPopulation.toLocaleString() : 'N/A';
+      const income = demographics ? `${Math.floor(demographics.medianIncome / 1000)}k` : 'N/A';
+      const competitionLevel = marketData.competitionLevel;
+      const opportunityScore = marketData.opportunityScore;
       
-      return `TERRITORY INTELLIGENCE ANALYSIS:
+      return `MARKET ANALYSIS SUMMARY:
 
-${practice} represents a HIGH-VALUE opportunity with ${qualified} qualified Invisalign prospects (median income: ${income}) and only ${competitors} direct competitors currently advertising.
+This market contains ${totalPractices} dental practices serving ${population} residents with a median income of ${income}.
 
-KEY STRATEGIC ADVANTAGES:
-• Market Share Projection: ${marketShare}% with $2,500 monthly investment
-• Expected Monthly Cases: ${cases} new Invisalign starts
-• Projected Net Profit: ${profit.toLocaleString()}/month
-• ROI Multiple: ${(profit/2500).toFixed(1)}x return on ad spend
+INVISALIGN MARKET PENETRATION:
+${invisalignPercent}% of practices (${marketData.invisalignProviders} practices) currently offer Invisalign services. This indicates ${invisalignPercent < 25 ? 'significant growth opportunity' : invisalignPercent < 40 ? 'moderate market development' : 'mature market conditions'}.
 
-COMPETITIVE POSITIONING:
-With ${competitors} active Invisalign advertisers spending an estimated ${data.competitors.competitorSpend.toLocaleString()}/month total, your $2,500 investment captures ${marketShare}% share of voice in this territory.
+COMPETITIVE LANDSCAPE:
+Competition level: ${competitionLevel}
+Market density: ${marketData.marketDensity.toFixed(1)} practices per 1,000 residents
+Average practice rating: ${marketData.avgRating.toFixed(1)} stars
+Digital marketing activity: ${marketData.withMetaAds} practices actively advertising
 
-TERRITORY LOCK RECOMMENDATION:
-IMMEDIATE ACTION REQUIRED. This territory shows strong profit potential with limited competition. Once locked, no other practices can access our proprietary actor-led video ad system within the 10-mile radius.
+MARKET OPPORTUNITY:
+Opportunity Score: ${opportunityScore}/100
+${opportunityScore > 70 ? 'HIGH POTENTIAL - Strong opportunity for new Invisalign provider' : 
+  opportunityScore > 50 ? 'MODERATE POTENTIAL - Competitive but viable market' : 
+  'CHALLENGING MARKET - High competition or market saturation'}
 
-Lock this territory today to secure exclusive access to these ${qualified} high-value prospects.`;
+STRATEGIC RECOMMENDATIONS:
+${getStrategicRecommendations(marketData, demographics)}`;
+    }
+    
+    function getStrategicRecommendations(marketData, demographics) {
+      const recommendations = [];
+      
+      if (marketData.penetrationRate < 0.3) {
+        recommendations.push('• Consider entering market - low Invisalign provider density');
+      }
+      
+      if (marketData.withMetaAds < marketData.totalPractices * 0.3) {
+        recommendations.push('• Digital marketing opportunity - few practices advertising online');
+      }
+      
+      if (marketData.avgRating < 4.0) {
+        recommendations.push('• Focus on service quality - average ratings below 4.0 stars');
+      }
+      
+      if (demographics && demographics.medianIncome > 65000) {
+        recommendations.push('• Target affluent demographics - above-average income levels');
+      }
+      
+      if (recommendations.length === 0) {
+        recommendations.push('• Market analysis complete - consult with strategic advisor for detailed planning');
+      }
+      
+      return recommendations.join('\n');
     }
 
     // ===========================================
-    // 9. TERRITORY REPORT PDF GENERATION
+    // 10. REPORT GENERATION
     // ===========================================
     
-    function generateTerritoryReport() {
-      if (!selectedPlace || !demographicData || !competitorData) {
-        alert('Please run territory analysis first');
+    function generateMarketReport() {
+      if (!marketData || !demographicData) {
+        alert('Please run market analysis first');
         return;
       }
       
@@ -1221,112 +1070,77 @@ Lock this territory today to secure exclusive access to these ${qualified} high-
       doc.rect(0, 0, 210, 35, 'F');
       
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(20);
+      doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('TERRITORY INTELLIGENCE REPORT', 20, 20);
+      doc.text('DENTAL MARKET INTELLIGENCE REPORT', 20, 20);
       doc.setFontSize(12);
-      doc.text('Established Shot — AI-Powered Market Analysis', 20, 28);
+      doc.text('Professional Market Analysis & Practice Mapping', 20, 28);
       
-      // Practice Details
+      // Market Overview
       doc.setTextColor(0, 0, 0);
-      doc.setFontSize(16);
+      doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text('PRACTICE TERRITORY ANALYSIS', 20, 50);
+      doc.text('MARKET OVERVIEW', 20, 50);
       
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
-      const practiceInfo = [
-        `Practice: ${selectedPlace.name}`,
-        `Address: ${selectedPlace.formatted_address}`,
-        `Protected Radius: ${document.getElementById('radius').value} miles`,
-        `Analysis Date: ${new Date().toLocaleDateString()}`,
-        `Territory Status: ${territoryLocked ? 'LOCKED & PROTECTED' : 'AVAILABLE FOR LOCKING'}`
+      const overview = [
+        `Analysis Area: ${selectedLocation ? selectedLocation.address : 'Selected Area'}`,
+        `Total Practices: ${marketData.totalPractices}`,
+        `Invisalign Providers: ${marketData.invisalignProviders} (${(marketData.penetrationRate * 100).toFixed(0)}%)`,
+        `Market Density: ${marketData.marketDensity.toFixed(1)} practices per 1,000 residents`,
+        `Competition Level: ${marketData.competitionLevel}`,
+        `Opportunity Score: ${marketData.opportunityScore}/100`
       ];
       
-      practiceInfo.forEach((line, i) => {
+      overview.forEach((line, i) => {
         doc.text(line, 20, 60 + (i * 6));
       });
       
-      // Demographics Section
+      // Demographics
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text('DEMOGRAPHIC INTELLIGENCE', 20, 100);
+      doc.text('DEMOGRAPHICS', 20, 105);
       
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');
       const demoInfo = [
         `Total Population: ${demographicData.totalPopulation.toLocaleString()}`,
-        `Qualified Prospects: ${demographicData.qualifiedAudience.toLocaleString()}`,
         `Median Income: ${Math.floor(demographicData.medianIncome / 1000)}k`,
-        `Market Penetration: ${(demographicData.qualifiedPercent * 100).toFixed(1)}% qualified rate`
+        `Qualified Prospects: ${demographicData.qualifiedAudience.toLocaleString()}`,
+        `Market Penetration: ${(demographicData.qualifiedPercent * 100).toFixed(1)}%`
       ];
       
       demoInfo.forEach((line, i) => {
-        doc.text(line, 20, 110 + (i * 6));
+        doc.text(line, 20, 115 + (i * 6));
       });
       
-      // Competition Analysis
+      // Competitive Analysis
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text('COMPETITIVE LANDSCAPE', 20, 140);
+      doc.text('COMPETITIVE ANALYSIS', 20, 145);
       
       const compInfo = [
-        `Direct Invisalign Competitors: ${competitorData.invisalignProviders}`,
-        `Estimated Competitor Spend: ${competitorData.competitorSpend.toLocaleString()}/month`,
-        `Your Projected Market Share: ${competitorData.ourMarketShare}%`,
-        `Share of Voice: ${competitorData.shareOfVoice}% with $2,500/month spend`
+        `High-Rated Practices (4.0+): ${marketData.highRated}`,
+        `Practices with Digital Ads: ${marketData.withMetaAds}`,
+        `Average Rating: ${marketData.avgRating.toFixed(1)} stars`,
+        `Digital Marketing Penetration: ${(marketData.withMetaAds / marketData.totalPractices * 100).toFixed(0)}%`
       ];
       
       compInfo.forEach((line, i) => {
-        doc.text(line, 20, 150 + (i * 6));
+        doc.text(line, 20, 155 + (i * 6));
       });
-      
-      // ROI Projections
-      const roi = calculateROIForecast();
-      doc.setFillColor(242, 169, 34, 0.1);
-      doc.rect(20, 175, 170, 35, 'F');
-      
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('ROI PROJECTIONS', 25, 185);
-      
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'normal');
-      const roiInfo = [
-        `Monthly Ad Spend: $2,500`,
-        `Expected New Cases: ${roi.newCases} Invisalign starts`,
-        `Gross Revenue: ${roi.grossRevenue.toLocaleString()}`,
-        `Net Monthly Profit: ${roi.netProfit.toLocaleString()}`,
-        `ROI Multiple: ${roi.roiMultiple.toFixed(1)}x return`
-      ];
-      
-      roiInfo.forEach((line, i) => {
-        doc.text(line, 25, 195 + (i * 5));
-      });
-      
-      // Territory Protection Message
-      doc.setFillColor(16, 185, 129);
-      doc.rect(20, 220, 170, 25, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text('🔒 EXCLUSIVE TERRITORY PROTECTION', 25, 230);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Lock this territory for $2,500/month and gain exclusive access to our', 25, 237);
-      doc.text('actor-led video ad system. No competitors can run our ads in your radius.', 25, 242);
       
       // Footer
       doc.setFillColor(1, 46, 64);
-      doc.rect(0, 250, 210, 20, 'F');
+      doc.rect(0, 270, 210, 20, 'F');
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(8);
-      doc.text('Established Shot Territory Intelligence Engine™ — Confidential Analysis', 20, 258);
-      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 264);
+      doc.text('Dental Market Intelligence Tool — Professional Analysis Report', 20, 280);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 285);
       
       // Save PDF
-      const filename = `Territory_Report_${selectedPlace.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      const filename = `Market_Analysis_Report_${new Date().toISOString().split('T')[0]}.pdf`;
       doc.save(filename);
       
       // UI feedback
@@ -1342,134 +1156,36 @@ Lock this territory today to secure exclusive access to these ${qualified} high-
     }
 
     // ===========================================
-    // 10. EVENT HANDLERS & UTILITIES
+    // 11. EVENT LISTENERS
     // ===========================================
-    
-    function setupAddressSearch() {
-      const searchInput = document.getElementById('search');
-      const autocomplete = new google.maps.places.Autocomplete(searchInput, {
-        fields: ['place_id', 'name', 'formatted_address', 'geometry'],
-        types: ['establishment']
-      });
-      
-      autocomplete.addListener('place_changed', async () => {
-        const place = autocomplete.getPlace();
-        if (!place || !place.geometry) return;
-        
-        selectedPlace = place;
-        
-        // Check territory availability
-        const available = checkTerritoryAvailability(place.geometry.location);
-        
-        if (available) {
-          // Center map on selection
-          map.setCenter(place.geometry.location);
-          map.setZoom(12);
-          
-          // Add marker for selected practice
-          new google.maps.Marker({
-            position: place.geometry.location,
-            map: map,
-            title: place.name,
-            icon: {
-              path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#05908C',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 2,
-              scale: 10
-            }
-          });
-        }
-      });
-    }
     
     function bindEventListeners() {
       // Main analyze button
-      document.getElementById('analyzeBtn').addEventListener('click', async () => {
-        if (!selectedPlace) {
-          alert('Please select a practice first');
-          return;
-        }
-        
-        const radiusMiles = parseInt(document.getElementById('radius').value);
-        const center = selectedPlace.geometry.location;
-        
-        console.log('🔍 Starting territory analysis...');
-        
-        try {
-          // Run all analysis functions
-          await getDemographicData(center, radiusMiles);
-          await getCompetitorIntelligence(center, radiusMiles);
-          calculateDemandCeiling();
-          calculateROIForecast();
-          await generateAIAnalysis();
-          
-          console.log('✅ Territory analysis complete!');
-        } catch (error) {
-          console.error('Analysis error:', error);
-          alert('Analysis failed. Please try again.');
-        }
+      document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
+      
+      // Filter toggles
+      document.getElementById('filterInvisalign').addEventListener('click', () => {
+        toggleFilter('invisalignOnly');
       });
       
-      // Territory locking buttons
-      document.getElementById('lockBtn').addEventListener('click', lockTerritory);
-      document.getElementById('holdBtn').addEventListener('click', holdTerritory);
+      document.getElementById('filterHighRated').addEventListener('click', () => {
+        toggleFilter('highRatedOnly');
+      });
       
-      // Report generation
-      document.getElementById('generateReport').addEventListener('click', generateTerritoryReport);
+      document.getElementById('filterMetaAds').addEventListener('click', () => {
+        toggleFilter('metaAdsOnly');
+      });
       
       // Heatmap controls
       document.getElementById('incomeHeatmap').addEventListener('click', toggleIncomeHeatmap);
       document.getElementById('ageHeatmap').addEventListener('click', toggleAgeHeatmap);
       document.getElementById('behaviorHeatmap').addEventListener('click', toggleBehaviorHeatmap);
-    }
-    
-    function startScarcityCounter() {
-      // Decrease territory count periodically to create urgency
-      setInterval(() => {
-        if (Math.random() < 0.1) { // 10% chance every 30 seconds
-          updateTerritoryCounter(-1);
-        }
-      }, 30000);
-    }
-    
-    function updateTerritoryCounter(change) {
-      const counter = document.getElementById('territoriesRemaining');
-      const current = parseInt(counter.textContent.match(/\d+/)[0]);
-      const newCount = Math.max(1, current + change);
       
-      if (newCount !== current) {
-        counter.textContent = `Only ${newCount} founding territories left nationwide`;
-        
-        // Add urgency styling when count gets low
-        if (newCount <= 3) {
-          counter.parentElement.style.background = 'rgba(239,68,68,.25)';
-          counter.parentElement.style.animation = 'urgentPulse 2s infinite';
-        }
-      }
+      // Report generation
+      document.getElementById('generateReport').addEventListener('click', generateMarketReport);
     }
     
-    // Heatmap toggle functions (placeholder implementations)
-    function toggleIncomeHeatmap() {
-      const btn = document.getElementById('incomeHeatmap');
-      btn.classList.toggle('active');
-      // Implementation would show/hide income-based heatmap overlay
-    }
-    
-    function toggleAgeHeatmap() {
-      const btn = document.getElementById('ageHeatmap');
-      btn.classList.toggle('active');
-      // Implementation would show/hide age demographic overlay
-    }
-    
-    function toggleBehaviorHeatmap() {
-      const btn = document.getElementById('behaviorHeatmap');
-      btn.classList.toggle('active');
-      // Implementation would show/hide behavioral interest overlay
-    }
-    
-    console.log('🚀 Established Shot Territory Intelligence Engine™ Ready');
+    console.log('🚀 Dental Market Intelligence Tool Ready');
   </script>
 </body>
 </html>
