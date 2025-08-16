@@ -1,12 +1,13 @@
 // Enhanced Facebook Ad Library Integration with Real-Time Data
-// /api/competitor-analysis.js - Updated Version
+// /api/competitor-analysis.js - FIXED VERSION
 
 export default async function handler(req, res) {
-  // CORS
+  // CORS - UPDATED with your Vercel domain
   const allowed = [
     'https://www.establishedshot.com',
     'https://dental-map.vercel.app', 
     'https://map.establishedshot.com',
+    'https://dental-map-git-main-nicolas-projects-d1a13165.vercel.app',
     'http://localhost:3000'
   ];
   
@@ -677,10 +678,22 @@ function simulateEnhancedFacebookData(practices, location) {
   };
 }
 
+// FIXED FUNCTION - This was the main issue!
 function calculateEnhancedAdProbability(practice) {
   let probability = 0.12; // Base 12%
   
   if (practice.website) probability += 0.25;
+  if (practice.rating >= 4.5) probability += 0.20;
+  if (practice.user_ratings_total > 200) probability += 0.15;
+  if (practice.isInvisalignProvider) probability += 0.25;
+  if (practice.name.toLowerCase().includes('cosmetic')) probability += 0.15;
+  
+  return Math.min(0.85, probability);
+}
+
+function estimateMonthlyAdSpend(practice) {
+  let baseSpend = 600;
+  
   if (practice.rating >= 4.5) baseSpend *= 1.4;
   if (practice.user_ratings_total > 200) baseSpend *= 1.6;
   if (practice.isInvisalignProvider) baseSpend *= 1.5;
@@ -738,21 +751,10 @@ function generateRealisticAdHeadline(practice) {
     `Transform Your Smile with ${practice.practiceName}`
   ];
   
-  if (practice.adTypes.invisalign > 0) {
+  if (practice.adTypes && practice.adTypes.invisalign > 0) {
     headlines.push(`Invisalign Treatment at ${practice.practiceName}`);
     headlines.push(`Clear Aligners - ${practice.practiceName}`);
   }
   
   return headlines[Math.floor(Math.random() * headlines.length)];
-}.5) probability += 0.20;
-  if (practice.user_ratings_total > 100) probability += 0.15;
-  if (practice.isInvisalignProvider) probability += 0.25;
-  if (practice.name.toLowerCase().includes('cosmetic')) probability += 0.15;
-  
-  return Math.min(0.85, probability);
 }
-
-function estimateMonthlyAdSpend(practice) {
-  let baseSpend = 600;
-  
-  if (practice.rating >= 4
