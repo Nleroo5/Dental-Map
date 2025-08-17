@@ -478,22 +478,36 @@
         types: ['geocode']
       });
       
-      autocomplete.addListener('place_changed', async () => {
-        const place = autocomplete.getPlace();
-        if (!place || !place.geometry) return;
-        
-        selectedLocation = {
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-          address: place.formatted_address
-        };
-        
-        // Center map on location
-        map.setCenter(place.geometry.location);
-        map.setZoom(12);
-        
-        console.log('📍 Location selected:', selectedLocation.address);
-      });
+autocomplete.addListener('place_changed', async () => {
+  const place = autocomplete.getPlace();
+  if (!place || !place.geometry) return;
+  
+  const newLocation = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+    address: place.formatted_address
+  };
+  
+  // Debug the location change
+  console.log('🔍 DEBUG: Location Change Analysis');
+  console.log('Previous location:', selectedLocation);
+  console.log('New location:', newLocation);
+  console.log('Coordinates changed:', 
+    !selectedLocation || 
+    selectedLocation.lat !== newLocation.lat || 
+    selectedLocation.lng !== newLocation.lng
+  );
+  
+  // Update selected location
+  selectedLocation = newLocation;
+  
+  // Center map on location
+  map.setCenter(place.geometry.location);
+  map.setZoom(12);
+  
+  console.log('📍 NEW Location selected:', selectedLocation.address);
+  console.log('📍 Coordinates:', selectedLocation.lat, selectedLocation.lng);
+});
     }
 
     // ===========================================
