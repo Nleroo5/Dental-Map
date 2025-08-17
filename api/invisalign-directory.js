@@ -1,12 +1,13 @@
-// /api/invisalign-directory.js - Official Invisalign Provider Directory Verification
+// /api/invisalign-directory.js - FIXED VERSION with CORS domain added
 // Features: Directory Cross-Reference, Fuzzy Matching, Location Verification
 
 export default async function handler(req, res) {
-  // CORS Configuration
+  // CORS Configuration - FIXED: Added your Vercel domain
   const allowed = [
     'https://www.establishedshot.com',
     'https://dental-map.vercel.app',
     'https://map.establishedshot.com',
+    'https://dental-map-git-main-nicolas-projects-d1a13165.vercel.app',
     'http://localhost:3000'
   ];
   
@@ -564,7 +565,9 @@ function analyzePracticeSizeIndicators(name, phone) {
   }
   
   return { score, factors };
-}NameForInvisalign(name) {
+}
+
+function analyzeNameForInvisalign(name) {
   const normalizedName = normalizeString(name);
   
   const strongIndicators = ['invisalign', 'orthodontic', 'orthodontist'];
@@ -586,5 +589,3 @@ function analyzePracticeSizeIndicators(name, phone) {
     matchedWeak: weakIndicators.filter(i => normalizedName.includes(i))
   };
 }
-
-function analyze
