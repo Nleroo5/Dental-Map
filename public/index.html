@@ -1505,17 +1505,73 @@
       `;
     }
     
-    function clearMap() {
-      practiceMarkers.forEach(marker => {
-        marker.setMap(null);
-      });
-      practiceMarkers = [];
-      
-      if (radiusCircle) {
-        radiusCircle.setMap(null);
-        radiusCircle = null;
-      }
-    }
+   function clearMap() {
+  // Clear map markers
+  practiceMarkers.forEach(marker => {
+    marker.setMap(null);
+  });
+  practiceMarkers = [];
+  
+  // Clear radius circle
+  if (radiusCircle) {
+    radiusCircle.setMap(null);
+    radiusCircle = null;
+  }
+}
+
+// ADD this new function right after clearMap():
+function clearAllData() {
+  console.log('🧹 Clearing all previous data...');
+  
+  // Clear global state
+  allPractices = [];
+  demographicData = null;
+  marketData = null;
+  window.marketData = null;
+  
+  // Clear map
+  clearMap();
+  
+  // Reset ALL UI elements to default values
+  document.getElementById('totalPractices').textContent = '--';
+  document.getElementById('invisalignCount').textContent = '--';
+  document.getElementById('marketDensity').textContent = '--';
+  document.getElementById('overviewMeta').textContent = 'Analyzing new location...';
+  
+  document.getElementById('totalPop').textContent = '--';
+  document.getElementById('qualifiedAudience').textContent = '--';
+  document.getElementById('medianIncome').textContent = '--';
+  document.getElementById('audienceMeta').textContent = 'Fetching demographic data...';
+  
+  document.getElementById('penetrationRate').textContent = '--';
+  document.getElementById('avgRating').textContent = '--';
+  document.getElementById('competitionLevel').textContent = '--';
+  document.getElementById('opportunityScore').textContent = '--';
+  document.getElementById('intelligenceMeta').textContent = 'Analyzing market intelligence...';
+  
+  document.getElementById('practicesWithAds').textContent = '--';
+  document.getElementById('totalAdSpend').textContent = '--';
+  document.getElementById('adCompetition').textContent = '--';
+  document.getElementById('marketShare').textContent = '--';
+  document.getElementById('digitalMeta').textContent = 'Analyzing advertising data...';
+  
+  document.getElementById('targetPop').textContent = '--';
+  document.getElementById('marketDemand').textContent = '--';
+  document.getElementById('competitionFactor').textContent = '--';
+  document.getElementById('opportunityValue').textContent = '--';
+  
+  document.getElementById('competitorTotal').textContent = '--';
+  document.getElementById('competitorInvisalign').textContent = '--';
+  document.getElementById('competitorAds').textContent = '--';
+  document.getElementById('competitorHighRated').textContent = '--';
+  document.getElementById('competitorMeta').textContent = 'Analyzing competitors...';
+  
+  // Clear AI analysis
+  document.getElementById('marketAnalysis').innerHTML = 'Starting enhanced dual AI analysis for new location...';
+  document.getElementById('reportSection').style.display = 'none';
+  
+  console.log('✅ All data cleared - ready for new analysis');
+}
     
     function showRadiusCircle(location, radiusMiles) {
       if (radiusCircle) {
