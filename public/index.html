@@ -620,23 +620,46 @@
     <script>
         // Global variables
         let map;
-        let searchBox;
         let selectedPractice = null;
         let practiceMarkers = [];
         let infoWindow;
         let autocompleteService;
         let placesService;
 
-        // Initialize the application
+        // Initialize the application - SIMPLIFIED VERSION
         function initApp() {
-            initMap();
-            initEventListeners();
-            initAutocomplete();
+            console.log('🚀 Dental Meta Ads Map Tool Loading...');
+            
+            // Use direct Google Maps API loading
+            if (window.google && window.google.maps) {
+                initializeComponents();
+            } else {
+                // Load Google Maps API
+                const script = document.createElement('script');
+                script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAxGsWxYXaMz4BUD6HmFmoA-OBkOPjeMO4&libraries=places&callback=initializeComponents';
+                script.async = true;
+                document.head.appendChild(script);
+            }
         }
+
+        // Initialize components after Google Maps loads
+        function initializeComponents() {
+            try {
+                initMap();
+                initEventListeners();
+                initAutocomplete();
+                console.log('✅ Dental Meta Ads Map Tool Ready');
+            } catch (error) {
+                console.error('❌ Initialization failed:', error);
+                showMessage('Failed to initialize the application. Please refresh the page.', 'error');
+            }
+        }
+
+        // Make initializeComponents globally available for the callback
+        window.initializeComponents = initializeComponents;
 
         // Initialize Google Maps
         function initMap() {
-            // Default to Atlanta, GA
             const defaultCenter = { lat: 33.7490, lng: -84.3880 };
             
             map = new google.maps.Map(document.getElementById('map'), {
@@ -687,7 +710,6 @@
                 });
             });
 
-            // Hide dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.search-wrapper')) {
                     dropdown.style.display = 'none';
@@ -731,14 +753,11 @@
                 if (status === google.maps.places.PlacesServiceStatus.OK) {
                     selectedPractice = place;
                     
-                    // Center map on selected practice
                     map.setCenter(place.geometry.location);
                     map.setZoom(14);
                     
-                    // Enable analyze button
                     document.getElementById('analyzeBtn').disabled = false;
                     
-                    // Add marker for selected practice
                     clearMarkers();
                     addSelectedPracticeMarker(place);
                     
@@ -777,7 +796,7 @@
             document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
         }
 
-        // Analyze market function - REAL API CALLS
+        // Analyze market function
         async function analyzeMarket() {
             if (!selectedPractice) {
                 showMessage('Please select a practice first', 'error');
@@ -790,24 +809,23 @@
             try {
                 updateLoadingText('Finding nearby practices...');
                 
-                // Get radius
                 const radiusSelect = document.getElementById('radius');
                 const radiusMiles = parseInt(radiusSelect.value);
                 const radiusMeters = radiusMiles * 1609.34;
 
-                // Step 1: Get practices from Google Places
+                // Get practices from Google Places
                 const googlePractices = await getNearbyPracticesFromGoogle(selectedPractice.geometry.location, radiusMeters);
                 updateLoadingText('Expanding search with Yelp...', `Found ${googlePractices.length} practices from Google Places`);
 
-                // Step 2: Get additional practices from Yelp
+                // Get additional practices from Yelp
                 const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
                 updateLoadingText('Combining and deduplicating results...', `Found ${yelpPractices.length} additional practices from Yelp`);
 
-                // Step 3: Combine and deduplicate
+                // Combine and deduplicate
                 const allPractices = combineAndDeduplicatePractices(googlePractices, yelpPractices);
                 updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} total practices`);
                 
-                // Step 4: Check Meta ads for all practices
+                // Check Meta ads for all practices
                 const practicesWithAds = await checkMetaAdsForPractices(allPractices);
                 
                 // Display results
@@ -859,358 +877,3 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        latitude: center.lat(),
-                        longitude: center.lng(),
-                        radius: radius
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Yelp API error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.success) {
-                    return data.practices || [];
-                } else {
-                    console.error('Yelp search failed:', data.error);
-                    return [];
-                }
-            } catch (error) {
-                console.error('Yelp API call failed:', error);
-                return []; // Graceful degradation - continue with Google Places only
-            }
-        }
-
-        // Combine and deduplicate practices from Google Places and Yelp
-        function combineAndDeduplicatePractices(googlePractices, yelpPractices) {
-            const combinedPractices = [...googlePractices];
-            const duplicateThreshold = 100; // meters
-
-            yelpPractices.forEach(yelpPractice => {
-                // Check if this Yelp practice is already in Google Places results
-                const isDuplicate = googlePractices.some(googlePractice => {
-                    const distance = calculateDistance(
-                        googlePractice.lat || googlePractice.geometry.location.lat(),
-                        googlePractice.lng || googlePractice.geometry.location.lng(),
-                        yelpPractice.lat,
-                        yelpPractice.lng
-                    );
-                    
-                    const nameSimilarity = calculateNameSimilarity(
-                        googlePractice.name,
-                        yelpPractice.name
-                    );
-                    
-                    return distance < duplicateThreshold && nameSimilarity > 0.7;
-                });
-
-                if (!isDuplicate) {
-                    // Add geometry object for Yelp practices to match Google Places format
-                    yelpPractice.geometry = {
-                        location: new google.maps.LatLng(yelpPractice.lat, yelpPractice.lng)
-                    };
-                    combinedPractices.push(yelpPractice);
-                }
-            });
-
-            return combinedPractices;
-        }
-
-        // Check Meta ads for all practices
-        async function checkMetaAdsForPractices(practices) {
-            try {
-                updateLoadingText('Checking Meta advertising status...', 'Connecting to Meta Ad Library API');
-                
-                const response = await fetch('/api/competitor-analysis', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        practices: practices.slice(0, 50) // Limit to 50 practices as per spec
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Meta API error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Map the Meta ads results back to practices
-                    const updatedPractices = practices.map(practice => {
-                        const metaResult = data.practiceBreakdown.find(result => 
-                            result.practiceId === practice.place_id || 
-                            result.practiceName === practice.name
-                        );
-                        
-                        if (metaResult) {
-                            return {
-                                ...practice,
-                                hasActiveAds: metaResult.hasAds,
-                                verified: metaResult.verified,
-                                confidence: metaResult.confidence,
-                                metaReason: metaResult.reason
-                            };
-                        } else {
-                            return {
-                                ...practice,
-                                hasActiveAds: null,
-                                verified: false,
-                                confidence: 0,
-                                metaReason: 'not_checked'
-                            };
-                        }
-                    });
-                    
-                    return updatedPractices;
-                } else {
-                    console.error('Meta ads analysis failed:', data.error);
-                    // Return practices with unknown ad status
-                    return practices.map(practice => ({
-                        ...practice,
-                        hasActiveAds: null,
-                        verified: false,
-                        confidence: 0,
-                        metaReason: 'api_error'
-                    }));
-                }
-            } catch (error) {
-                console.error('Meta ads check failed:', error);
-                // Graceful degradation - return practices with unknown ad status
-                return practices.map(practice => ({
-                    ...practice,
-                    hasActiveAds: null,
-                    verified: false,
-                    confidence: 0,
-                    metaReason: 'connection_error'
-                }));
-            }
-        }
-
-        // Helper function to calculate distance between two points
-        function calculateDistance(lat1, lng1, lat2, lng2) {
-            const R = 6371000; // Earth's radius in meters
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLng = (lng2 - lng1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLng / 2) * Math.sin(dLng / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        // Helper function to calculate name similarity
-        function calculateNameSimilarity(name1, name2) {
-            const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
-            const s1 = normalize(name1);
-            const s2 = normalize(name2);
-            
-            if (s1 === s2) return 1;
-            
-            const maxLen = Math.max(s1.length, s2.length);
-            if (maxLen === 0) return 1;
-            
-            const distance = levenshteinDistance(s1, s2);
-            return 1 - (distance / maxLen);
-        }
-
-        // Levenshtein distance calculation
-        function levenshteinDistance(str1, str2) {
-            const matrix = [];
-
-            for (let i = 0; i <= str2.length; i++) {
-                matrix[i] = [i];
-            }
-
-            for (let j = 0; j <= str1.length; j++) {
-                matrix[0][j] = j;
-            }
-
-            for (let i = 1; i <= str2.length; i++) {
-                for (let j = 1; j <= str1.length; j++) {
-                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                        matrix[i][j] = matrix[i - 1][j - 1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i - 1][j - 1] + 1,
-                            matrix[i][j - 1] + 1,
-                            matrix[i - 1][j] + 1
-                        );
-                    }
-                }
-            }
-
-            return matrix[str2.length][str1.length];
-        }
-
-        // Display practices on map
-        function displayPractices(practices) {
-            clearMarkers();
-            
-            // Add selected practice marker
-            if (selectedPractice) {
-                addSelectedPracticeMarker(selectedPractice);
-            }
-
-            // Add practice markers
-            practices.forEach(practice => {
-                const color = getMarkerColor(practice);
-                
-                const marker = new google.maps.Marker({
-                    position: practice.geometry.location,
-                    map: map,
-                    title: practice.name,
-                    icon: {
-                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
-                            </svg>
-                        `),
-                        scaledSize: new google.maps.Size(20, 20),
-                        anchor: new google.maps.Point(10, 10)
-                    }
-                });
-
-                marker.addListener('click', () => {
-                    showPracticeInfo(practice, marker);
-                });
-
-                practiceMarkers.push(marker);
-            });
-        }
-
-        // Get marker color based on ad status
-        function getMarkerColor(practice) {
-            if (practice.hasActiveAds === true) return '#dc2626'; // Red - has ads
-            if (practice.hasActiveAds === false) return '#16a34a'; // Green - no ads
-            return '#6b7280'; // Gray - unknown
-        }
-
-        // Show practice information popup
-        function showPracticeInfo(practice, marker) {
-            const hasAds = practice.hasActiveAds;
-            const adStatusText = hasAds === true ? 'Has Active Meta Ads' : 
-                                hasAds === false ? 'No Meta Ads Found' : 'Ad Status Unknown';
-            const adStatusColor = hasAds === true ? '#dc2626' : 
-                                 hasAds === false ? '#16a34a' : '#6b7280';
-
-            const content = `
-                <div class="practice-popup">
-                    <div class="practice-name">${practice.name}</div>
-                    <div class="practice-detail">
-                        📍 ${practice.formatted_address || practice.vicinity}
-                    </div>
-                    ${practice.rating ? `
-                        <div class="practice-detail">
-                            ⭐ ${practice.rating.toFixed(1)} stars (${practice.user_ratings_total || 0} reviews)
-                        </div>
-                    ` : ''}
-                    ${practice.formatted_phone_number ? `
-                        <div class="practice-detail">
-                            📞 ${practice.formatted_phone_number}
-                        </div>
-                    ` : ''}
-                    ${practice.website ? `
-                        <div class="practice-detail">
-                            🌐 <a href="${practice.website}" target="_blank" class="practice-link">Visit Website</a>
-                        </div>
-                    ` : ''}
-                    <div class="practice-detail" style="color: ${adStatusColor}; font-weight: 600; margin-top: 8px;">
-                        📱 ${adStatusText}
-                    </div>
-                    ${hasAds === true ? `
-                        <div class="practice-detail">
-                            <a href="https://www.facebook.com/ads/library/?search_type=keyword_unordered&search=${encodeURIComponent(practice.name)}" target="_blank" class="practice-link">View Meta Ads</a>
-                        </div>
-                    ` : ''}
-                    <div class="practice-detail" style="font-size: 11px; color: #9ca3af; margin-top: 8px;">
-                        📊 Source: ${practice.source || 'google_places'}
-                        ${practice.confidence ? ` | Confidence: ${practice.confidence}%` : ''}
-                    </div>
-                </div>
-            `;
-
-            infoWindow.setContent(content);
-            infoWindow.open(map, marker);
-        }
-
-        // Update status panel
-        function updateStatusPanel(practices) {
-            const total = practices.length;
-            const withAds = practices.filter(p => p.hasActiveAds === true).length;
-            const verified = practices.filter(p => p.verified !== false).length;
-            const googleCount = practices.filter(p => p.source === 'google_places').length;
-            const yelpCount = practices.filter(p => p.source === 'yelp').length;
-
-            document.getElementById('totalPractices').textContent = total;
-            document.getElementById('verifiedData').textContent = `${verified}/${total}`;
-            document.getElementById('withAds').textContent = `${withAds}`;
-            document.getElementById('coverage').textContent = `${googleCount + yelpCount}`;
-            
-            const penetrationPercent = total > 0 ? (withAds / total * 100).toFixed(0) : 0;
-            document.getElementById('analysisMeta').innerHTML = 
-                `${penetrationPercent}% of practices actively advertising on Meta platforms<br>` +
-                `<span style="color: var(--gold);">Google Places (${googleCount}) + Yelp (${yelpCount}) • ${verified} verified</span>`;
-        }
-
-        // Clear all markers
-        function clearMarkers() {
-            practiceMarkers.forEach(marker => marker.setMap(null));
-            practiceMarkers = [];
-        }
-
-        // Show/hide loading overlay
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = show ? 'flex' : 'none';
-        }
-
-        // Update loading text
-        function updateLoadingText(text, progress = '') {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingProgress').textContent = progress;
-        }
-
-        // Show message to user
-        function showMessage(message, type = 'info') {
-            // Remove existing messages
-            const existingMessages = document.querySelectorAll('.error-message, .success-message');
-            existingMessages.forEach(msg => msg.remove());
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = message;
-
-            // Insert after toolbar
-            const toolbar = document.querySelector('.toolbar');
-            toolbar.insertAdjacentElement('afterend', messageDiv);
-
-            // Auto-remove after 5 seconds
-            setTimeout(() => {
-                messageDiv.remove();
-            }, 5000);
-        }
-
-        // Initialize when Google Maps loads
-        window.initApp = initApp;
-    </script>
-
-    <!-- Google Maps API -->
-    <script async defer 
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxGsWxYXaMz4BUD6HmFmoA-OBkOPjeMO4&libraries=places&callback=initApp">
-    </script>
-
-    <!-- Note: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual API key -->
-    <noscript>
-        <div style="padding: 2rem; text-align: center; background: rgba(239,68,68,.1); color: #ef4444; margin: 1rem; border-radius: 12px; border: 1px solid rgba(239,68,68,.3);">
-            <h2>JavaScript Required</h2>
-            <p>This application requires JavaScript to function properly. Please enable JavaScript in your browser.</p>
-        </div>
-    </noscript>
-</body>
-</html>
