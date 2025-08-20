@@ -1,8 +1,39 @@
 {
-  "headers": [
+  "version": 2,
+  "name": "dental-meta-ads-map",
+  "builds": [
     {
-      "source": "/(.*)\\.(js|css|png|jpg|jpeg|svg|webp|woff2?)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=300" }]
+      "src": "public/index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/competitor-analysis.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/yelp-search.js",
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "functions": {
+    "api/competitor-analysis.js": {
+      "maxDuration": 300
+    },
+    "api/yelp-search.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
