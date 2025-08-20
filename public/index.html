@@ -777,7 +777,7 @@
             document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
         }
 
-        // Analyze market function
+        // Analyze market function - REAL API CALLS
         async function analyzeMarket() {
             if (!selectedPractice) {
                 showMessage('Please select a practice first', 'error');
@@ -795,82 +795,257 @@
                 const radiusMiles = parseInt(radiusSelect.value);
                 const radiusMeters = radiusMiles * 1609.34;
 
-                // Simulate API calls for demo purposes
-                const practicesData = await simulatePracticeDiscovery(selectedPractice.geometry.location, radiusMeters);
+                // Step 1: Get practices from Google Places
+                const googlePractices = await getNearbyPracticesFromGoogle(selectedPractice.geometry.location, radiusMeters);
+                updateLoadingText('Expanding search with Yelp...', `Found ${googlePractices.length} practices from Google Places`);
+
+                // Step 2: Get additional practices from Yelp
+                const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
+                updateLoadingText('Combining and deduplicating results...', `Found ${yelpPractices.length} additional practices from Yelp`);
+
+                // Step 3: Combine and deduplicate
+                const allPractices = combineAndDeduplicatePractices(googlePractices, yelpPractices);
+                updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} total practices`);
                 
-                updateLoadingText('Checking Meta advertising status...');
-                
-                // Simulate Meta ads checking
-                const practicesWithAds = await simulateMetaAdsCheck(practicesData);
+                // Step 4: Check Meta ads for all practices
+                const practicesWithAds = await checkMetaAdsForPractices(allPractices);
                 
                 // Display results
                 displayPractices(practicesWithAds);
                 updateStatusPanel(practicesWithAds);
                 
                 showLoading(false);
-                showMessage('Analysis complete!', 'success');
+                showMessage(`Analysis complete! Found ${practicesWithAds.length} practices with ${practicesWithAds.filter(p => p.hasActiveAds === true).length} actively advertising.`, 'success');
                 
             } catch (error) {
                 console.error('Analysis error:', error);
                 showLoading(false);
-                showMessage('Analysis failed. Please try again.', 'error');
+                showMessage(`Analysis failed: ${error.message}`, 'error');
             }
         }
 
-        // Simulate practice discovery (Google Places + Yelp)
-        async function simulatePracticeDiscovery(center, radius) {
+        // Get nearby practices from Google Places API
+        async function getNearbyPracticesFromGoogle(center, radius) {
             return new Promise((resolve) => {
-                setTimeout(() => {
-                    // Generate sample practices around the center
-                    const practices = [];
-                    const practiceNames = [
-                        'SmileCare Dental', 'Family Dentistry Plus', 'Bright Smiles Clinic',
-                        'Advanced Dental Care', 'Downtown Dental', 'Gentle Dental Associates',
-                        'Premier Oral Health', 'Modern Dentistry', 'Elite Dental Practice',
-                        'Comfort Dental Care', 'Perfect Smile Studio', 'Healthy Teeth Clinic',
-                        'Professional Dental', 'Quality Dental Services', 'Excellence in Dentistry'
-                    ];
-
-                    for (let i = 0; i < Math.min(15, practiceNames.length); i++) {
-                        // Generate random location within radius
-                        const angle = Math.random() * 2 * Math.PI;
-                        const distance = Math.random() * radius * 0.8; // 80% of radius
-                        
-                        const lat = center.lat() + (distance * Math.cos(angle)) / 111320;
-                        const lng = center.lng() + (distance * Math.sin(angle)) / (111320 * Math.cos(center.lat() * Math.PI / 180));
-
-                        practices.push({
-                            place_id: `demo_${i}`,
-                            name: practiceNames[i],
-                            geometry: { location: new google.maps.LatLng(lat, lng) },
-                            formatted_address: `${100 + i * 25} Main St, Atlanta, GA 3030${i % 10}`,
-                            formatted_phone_number: `(555) ${String(123 + i).padStart(3, '0')}-${String(4567 + i).padStart(4, '0')}`,
-                            website: `https://www.${practiceNames[i].toLowerCase().replace(/\s+/g, '')}.com`,
-                            rating: 3.5 + Math.random() * 1.5,
-                            user_ratings_total: Math.floor(Math.random() * 200) + 20,
-                            source: Math.random() > 0.7 ? 'yelp' : 'google_places'
-                        });
+                const request = {
+                    location: center,
+                    radius: radius,
+                    type: 'dentist',
+                    fields: ['place_id', 'name', 'geometry', 'rating', 'user_ratings_total', 'vicinity', 'formatted_address', 'formatted_phone_number', 'website', 'photos']
+                };
+                
+                placesService.nearbySearch(request, (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK) {
+                        const practices = results.map(place => ({
+                            ...place,
+                            source: 'google_places',
+                            lat: place.geometry.location.lat(),
+                            lng: place.geometry.location.lng()
+                        }));
+                        resolve(practices || []);
+                    } else {
+                        console.error('Google Places search failed:', status);
+                        resolve([]);
                     }
-
-                    resolve(practices);
-                }, 1500);
+                });
             });
         }
 
-        // Simulate Meta ads checking
-        async function simulateMetaAdsCheck(practices) {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const practicesWithAds = practices.map(practice => ({
-                        ...practice,
-                        hasActiveAds: Math.random() > 0.7 ? true : Math.random() > 0.5 ? false : null,
-                        verified: Math.random() > 0.1,
-                        confidence: Math.floor(Math.random() * 20) + 80
-                    }));
+        // Get nearby practices from Yelp API
+        async function getNearbyPracticesFromYelp(center, radius) {
+            try {
+                const response = await fetch('/api/yelp-search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        latitude: center.lat(),
+                        longitude: center.lng(),
+                        radius: radius
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Yelp API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    return data.practices || [];
+                } else {
+                    console.error('Yelp search failed:', data.error);
+                    return [];
+                }
+            } catch (error) {
+                console.error('Yelp API call failed:', error);
+                return []; // Graceful degradation - continue with Google Places only
+            }
+        }
+
+        // Combine and deduplicate practices from Google Places and Yelp
+        function combineAndDeduplicatePractices(googlePractices, yelpPractices) {
+            const combinedPractices = [...googlePractices];
+            const duplicateThreshold = 100; // meters
+
+            yelpPractices.forEach(yelpPractice => {
+                // Check if this Yelp practice is already in Google Places results
+                const isDuplicate = googlePractices.some(googlePractice => {
+                    const distance = calculateDistance(
+                        googlePractice.lat || googlePractice.geometry.location.lat(),
+                        googlePractice.lng || googlePractice.geometry.location.lng(),
+                        yelpPractice.lat,
+                        yelpPractice.lng
+                    );
                     
-                    resolve(practicesWithAds);
-                }, 2500);
+                    const nameSimilarity = calculateNameSimilarity(
+                        googlePractice.name,
+                        yelpPractice.name
+                    );
+                    
+                    return distance < duplicateThreshold && nameSimilarity > 0.7;
+                });
+
+                if (!isDuplicate) {
+                    // Add geometry object for Yelp practices to match Google Places format
+                    yelpPractice.geometry = {
+                        location: new google.maps.LatLng(yelpPractice.lat, yelpPractice.lng)
+                    };
+                    combinedPractices.push(yelpPractice);
+                }
             });
+
+            return combinedPractices;
+        }
+
+        // Check Meta ads for all practices
+        async function checkMetaAdsForPractices(practices) {
+            try {
+                updateLoadingText('Checking Meta advertising status...', 'Connecting to Meta Ad Library API');
+                
+                const response = await fetch('/api/competitor-analysis', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        practices: practices.slice(0, 50) // Limit to 50 practices as per spec
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Meta API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Map the Meta ads results back to practices
+                    const updatedPractices = practices.map(practice => {
+                        const metaResult = data.practiceBreakdown.find(result => 
+                            result.practiceId === practice.place_id || 
+                            result.practiceName === practice.name
+                        );
+                        
+                        if (metaResult) {
+                            return {
+                                ...practice,
+                                hasActiveAds: metaResult.hasAds,
+                                verified: metaResult.verified,
+                                confidence: metaResult.confidence,
+                                metaReason: metaResult.reason
+                            };
+                        } else {
+                            return {
+                                ...practice,
+                                hasActiveAds: null,
+                                verified: false,
+                                confidence: 0,
+                                metaReason: 'not_checked'
+                            };
+                        }
+                    });
+                    
+                    return updatedPractices;
+                } else {
+                    console.error('Meta ads analysis failed:', data.error);
+                    // Return practices with unknown ad status
+                    return practices.map(practice => ({
+                        ...practice,
+                        hasActiveAds: null,
+                        verified: false,
+                        confidence: 0,
+                        metaReason: 'api_error'
+                    }));
+                }
+            } catch (error) {
+                console.error('Meta ads check failed:', error);
+                // Graceful degradation - return practices with unknown ad status
+                return practices.map(practice => ({
+                    ...practice,
+                    hasActiveAds: null,
+                    verified: false,
+                    confidence: 0,
+                    metaReason: 'connection_error'
+                }));
+            }
+        }
+
+        // Helper function to calculate distance between two points
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000; // Earth's radius in meters
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        // Helper function to calculate name similarity
+        function calculateNameSimilarity(name1, name2) {
+            const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const s1 = normalize(name1);
+            const s2 = normalize(name2);
+            
+            if (s1 === s2) return 1;
+            
+            const maxLen = Math.max(s1.length, s2.length);
+            if (maxLen === 0) return 1;
+            
+            const distance = levenshteinDistance(s1, s2);
+            return 1 - (distance / maxLen);
+        }
+
+        // Levenshtein distance calculation
+        function levenshteinDistance(str1, str2) {
+            const matrix = [];
+
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i - 1][j - 1] + 1,
+                            matrix[i][j - 1] + 1,
+                            matrix[i - 1][j] + 1
+                        );
+                    }
+                }
+            }
+
+            return matrix[str2.length][str1.length];
         }
 
         // Display practices on map
