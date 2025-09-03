@@ -25,14 +25,6 @@
       "dest": "/public/$1"
     }
   ],
-  "functions": {
-    "api/competitor-analysis.js": {
-      "maxDuration": 300
-    },
-    "api/yelp-search.js": {
-      "maxDuration": 30
-    }
-  },
   "env": {
     "NODE_ENV": "production"
   }
