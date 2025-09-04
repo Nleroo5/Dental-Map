@@ -148,6 +148,7 @@
         button:disabled {
             background: #444;
             cursor: not-allowed;
+            opacity: 0.6;
         }
         
         .autocomplete-dropdown {
@@ -301,6 +302,28 @@
             background: rgba(59,130,246,.2);
             color: #3b82f6;
         }
+
+        .search-by-location {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .location-btn {
+            padding: 8px 12px;
+            font-size: 12px;
+            background: #092431;
+            border: 1px solid rgba(255,255,255,.12);
+            color: #e6f1f1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .location-btn:hover {
+            background: rgba(255,255,255,.1);
+        }
         
         @media (max-width: 980px) {
             .grid {
@@ -340,6 +363,11 @@
             <div class="search-wrapper">
                 <input id="practiceSearch" type="text" placeholder="Search for dental practice name...">
                 <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
+                <div class="search-by-location">
+                    <span style="font-size: 12px; color: #9ca3af;">or</span>
+                    <button class="location-btn" id="useLocationBtn">📍 Use My Location</button>
+                    <button class="location-btn" id="searchAtlantaBtn">🏙️ Search Atlanta</button>
+                </div>
             </div>
             
             <select id="radius">
@@ -393,22 +421,27 @@
         let infoWindow;
         let autocompleteService;
         let placesService;
+        let geocoder;
+        let googleMapsApiKey = null;
 
         // Initialize the app
         async function initApp() {
             console.log('🚀 Initializing Dental Meta Ads Map Tool...');
             
             try {
-                // Get API key
-                const apiKey = await getApiKey();
+                // Get API key first
+                googleMapsApiKey = await getApiKey();
+                console.log('✅ API key retrieved successfully');
                 
                 // Load Google Maps with Places library
-                await loadGoogleMaps(apiKey);
+                await loadGoogleMapsAPI();
+                console.log('✅ Google Maps API loaded with Places library');
                 
-                // Initialize components
+                // Initialize components after successful load
                 initializeComponents();
                 
                 console.log('✅ App ready - Everything loaded successfully');
+                showMessage('App initialized successfully! Ready to analyze.', 'success');
                 
             } catch (error) {
                 console.error('❌ Initialization failed:', error);
@@ -433,76 +466,100 @@
             }
         }
 
-        // Load Google Maps with Places library
-        function loadGoogleMaps(apiKey) {
+        // Load Google Maps API with Places library
+        function loadGoogleMapsAPI() {
             return new Promise((resolve, reject) => {
+                // Check if already loaded
                 if (window.google && window.google.maps && window.google.maps.places) {
-                    console.log('Google Maps already loaded with Places');
+                    console.log('✅ Google Maps already loaded with Places');
                     resolve();
                     return;
                 }
                 
-                const script = document.createElement('script');
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-                script.async = true;
-                script.onload = () => {
+                // Create callback function
+                window.initGoogleMaps = function() {
+                    console.log('📍 Google Maps callback triggered');
+                    
+                    // Check if Places library is available
                     if (window.google && window.google.maps && window.google.maps.places) {
-                        console.log('✅ Google Maps loaded successfully with Places API');
+                        console.log('✅ Places library confirmed loaded');
                         resolve();
                     } else {
+                        console.error('❌ Places library not available after load');
                         reject(new Error('Places library failed to load'));
                     }
                 };
-                script.onerror = () => reject(new Error('Failed to load Google Maps API'));
+                
+                // Load the script
+                const script = document.createElement('script');
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places&callback=initGoogleMaps`;
+                script.async = true;
+                script.defer = true;
+                
+                script.onerror = () => {
+                    console.error('❌ Script loading failed');
+                    reject(new Error('Failed to load Google Maps script'));
+                };
+                
                 document.head.appendChild(script);
+                console.log('📡 Loading Google Maps script with Places library...');
             });
         }
 
-        // Initialize components
+        // Initialize components after Google Maps is ready
         function initializeComponents() {
-            initMap();
-            initEventListeners();
-            initPlacesAutocomplete();
+            try {
+                initMap();
+                initEventListeners();
+                initPlacesAutocomplete();
+                console.log('✅ All components initialized successfully');
+            } catch (error) {
+                console.error('❌ Component initialization failed:', error);
+                showMessage('Component initialization failed: ' + error.message, 'error');
+            }
         }
 
         // Initialize Google Maps
         function initMap() {
             const defaultCenter = { lat: 33.7490, lng: -84.3880 }; // Atlanta
             
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: defaultCenter,
-                zoom: 12,
-                disableDefaultUI: true,
-                zoomControl: true,
-                styles: [
-                    {
-                        featureType: 'poi.business',
-                        stylers: [{ visibility: 'off' }]
-                    },
-                    {
-                        featureType: 'poi.medical',
-                        stylers: [{ visibility: 'off' }]
-                    }
-                ]
-            });
-
-            infoWindow = new google.maps.InfoWindow();
-            
-            // Initialize Places services
             try {
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: defaultCenter,
+                    zoom: 12,
+                    disableDefaultUI: true,
+                    zoomControl: true,
+                    styles: [
+                        {
+                            featureType: 'poi.business',
+                            stylers: [{ visibility: 'off' }]
+                        },
+                        {
+                            featureType: 'poi.medical',
+                            stylers: [{ visibility: 'off' }]
+                        }
+                    ]
+                });
+
+                infoWindow = new google.maps.InfoWindow();
+                
+                // Initialize Places services
                 autocompleteService = new google.maps.places.AutocompleteService();
                 placesService = new google.maps.places.PlacesService(map);
-                console.log('✅ Places services initialized successfully');
+                geocoder = new google.maps.Geocoder();
+                
+                console.log('✅ Map and services initialized successfully');
+                
             } catch (error) {
-                console.error('❌ Failed to initialize Places services:', error);
-                showMessage('Places API not available - autocomplete disabled', 'error');
+                console.error('❌ Map initialization failed:', error);
+                throw new Error('Failed to initialize map: ' + error.message);
             }
         }
 
         // Initialize Places autocomplete
         function initPlacesAutocomplete() {
             if (!autocompleteService) {
-                console.log('❌ Autocomplete service not available');
+                console.error('❌ Autocomplete service not available');
                 return;
             }
 
@@ -529,41 +586,42 @@
                     dropdown.style.display = 'none';
                 }
             });
+
+            console.log('✅ Autocomplete initialized');
         }
 
         // Get Places autocomplete suggestions
         function getPlacesAutocomplete(input) {
             if (!autocompleteService) {
-                console.log('❌ Autocomplete service not available');
+                console.error('❌ Autocomplete service not available');
                 return;
             }
 
             const request = {
                 input: input,
                 types: ['establishment'],
-                componentRestrictions: { country: 'us' },
-                bounds: new google.maps.LatLngBounds(
-                    new google.maps.LatLng(33.4, -85.0),
-                    new google.maps.LatLng(34.0, -84.0)
-                )
+                componentRestrictions: { country: 'us' }
             };
 
             autocompleteService.getPlacePredictions(request, (predictions, status) => {
-                console.log('Autocomplete status:', status);
+                console.log('🔍 Autocomplete status:', status, 'Predictions:', predictions?.length || 0);
                 
                 if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+                    // Filter for dental-related businesses
                     const dentalPredictions = predictions.filter(p => {
                         const desc = p.description.toLowerCase();
                         return desc.includes('dental') || 
                                desc.includes('dentist') || 
                                desc.includes('orthodont') ||
-                               desc.includes('smile');
+                               desc.includes('smile') ||
+                               desc.includes('teeth') ||
+                               desc.includes('oral');
                     });
                     
-                    console.log(`Found ${dentalPredictions.length} dental predictions`);
-                    displayAutocompleteResults(dentalPredictions.slice(0, 5));
+                    console.log(`✅ Found ${dentalPredictions.length} dental predictions`);
+                    displayAutocompleteResults(dentalPredictions.slice(0, 8));
                 } else {
-                    console.log('No predictions or error:', status);
+                    console.log('⚠️ No predictions or error:', status);
                     document.getElementById('autocompleteDropdown').style.display = 'none';
                 }
             });
@@ -584,7 +642,7 @@
                 item.className = 'autocomplete-item';
                 item.innerHTML = `
                     <div style="font-weight: 500;">${prediction.structured_formatting.main_text}</div>
-                    <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">${prediction.structured_formatting.secondary_text}</div>
+                    <div style="font-size: 12px; color: #9ca3af; margin-top: 2px;">${prediction.structured_formatting.secondary_text || ''}</div>
                 `;
                 
                 item.addEventListener('click', () => {
@@ -612,7 +670,8 @@
                 placeId: prediction.place_id,
                 fields: [
                     'place_id', 'name', 'formatted_address', 'geometry',
-                    'formatted_phone_number', 'website', 'rating', 'user_ratings_total'
+                    'formatted_phone_number', 'website', 'rating', 'user_ratings_total',
+                    'types', 'photos'
                 ]
             };
 
@@ -627,11 +686,94 @@
                     
                     clearMarkers();
                     addSelectedPracticeMarker(place);
+                    updatePracticeDetails(place);
                     
                     showMessage(`Selected: ${place.name}`, 'success');
+                    console.log('✅ Practice selected:', place.name);
                 } else {
-                    console.error('Place details request failed:', status);
+                    console.error('❌ Place details request failed:', status);
                     showMessage('Error getting practice details: ' + status, 'error');
+                }
+            });
+        }
+
+        // Use user's current location
+        function useCurrentLocation() {
+            if (!navigator.geolocation) {
+                showMessage('Geolocation not supported by browser', 'error');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    map.setCenter({ lat, lng });
+                    map.setZoom(14);
+                    
+                    // Find nearest dental practice
+                    findNearestDentalPractice(lat, lng);
+                },
+                (error) => {
+                    console.error('❌ Geolocation error:', error);
+                    showMessage('Could not get your location', 'error');
+                }
+            );
+        }
+
+        // Search Atlanta area
+        function searchAtlanta() {
+            const atlantaCenter = { lat: 33.7490, lng: -84.3880 };
+            map.setCenter(atlantaCenter);
+            map.setZoom(12);
+            
+            findNearestDentalPractice(atlantaCenter.lat, atlantaCenter.lng);
+        }
+
+        // Find nearest dental practice
+        function findNearestDentalPractice(lat, lng) {
+            if (!placesService) {
+                showMessage('Places service not available', 'error');
+                return;
+            }
+
+            const request = {
+                location: new google.maps.LatLng(lat, lng),
+                radius: 5000, // 5km radius
+                type: 'dentist'
+            };
+
+            placesService.nearbySearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+                    // Select the first (nearest) practice
+                    const nearestPractice = results[0];
+                    
+                    // Get detailed information
+                    const detailRequest = {
+                        placeId: nearestPractice.place_id,
+                        fields: [
+                            'place_id', 'name', 'formatted_address', 'geometry',
+                            'formatted_phone_number', 'website', 'rating', 'user_ratings_total',
+                            'types', 'photos'
+                        ]
+                    };
+
+                    placesService.getDetails(detailRequest, (place, detailStatus) => {
+                        if (detailStatus === google.maps.places.PlacesServiceStatus.OK) {
+                            selectedPractice = place;
+                            document.getElementById('practiceSearch').value = place.name;
+                            document.getElementById('analyzeBtn').disabled = false;
+                            
+                            clearMarkers();
+                            addSelectedPracticeMarker(place);
+                            updatePracticeDetails(place);
+                            
+                            showMessage(`Found nearest practice: ${place.name}`, 'success');
+                        }
+                    });
+                } else {
+                    showMessage('No dental practices found nearby', 'error');
                 }
             });
         }
@@ -660,6 +802,8 @@
                             lng: place.geometry.location.lng(),
                             rating: place.rating,
                             user_ratings_total: place.user_ratings_total,
+                            types: place.types,
+                            photos: place.photos,
                             source: 'google_places'
                         }));
                         console.log(`✅ Found ${practices.length} practices from Google Places`);
@@ -728,7 +872,9 @@
                             ...practice,
                             hasActiveAds: adData ? adData.hasAds : null,
                             adVerified: adData ? adData.verified : false,
-                            adConfidence: adData ? adData.confidence : 0
+                            adConfidence: adData ? adData.confidence : 0,
+                            adCount: adData ? adData.adCount : 0,
+                            estimatedSpend: adData ? adData.estimatedSpend : 0
                         };
                     });
                 } else {
@@ -748,245 +894,3 @@
                     adVerified: false,
                     adConfidence: 0
                 }));
-            }
-        }
-
-        // Main analysis function
-        async function analyzeMarket() {
-            if (!selectedPractice) {
-                showMessage('Please select a practice first', 'error');
-                return;
-            }
-
-            showLoading(true);
-            clearMarkers();
-            
-            try {
-                updateLoadingText('Finding nearby practices with Google Places API...');
-                
-                const radiusSelect = document.getElementById('radius');
-                const radiusMiles = parseInt(radiusSelect.value);
-                const radiusMeters = radiusMiles * 1609.34;
-
-                // Get practices from Google Places
-                const placesPractices = await getNearbyPracticesFromPlaces(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Expanding search with Yelp API...');
-                
-                // Get additional practices from Yelp
-                const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Removing duplicates...');
-                
-                // Combine and deduplicate
-                const allPractices = deduplicatePractices([...placesPractices, ...yelpPractices]);
-                
-                updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} practices`);
-                
-                // Check Meta ads
-                const practicesWithAds = await checkMetaAdsForPractices(allPractices);
-                
-                // Display results
-                displayPractices(practicesWithAds);
-                updateAnalysisResults(practicesWithAds);
-                
-                showLoading(false);
-                showMessage(`Analysis complete! Found ${practicesWithAds.length} practices.`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Analysis error:', error);
-                showLoading(false);
-                showMessage(`Analysis failed: ${error.message}`, 'error');
-            }
-        }
-
-        // Deduplicate practices from multiple sources
-        function deduplicatePractices(practices) {
-            const unique = [];
-            const seenNames = new Set();
-            
-            practices.forEach(practice => {
-                const normalizedName = practice.name.toLowerCase().trim();
-                if (!seenNames.has(normalizedName)) {
-                    seenNames.add(normalizedName);
-                    unique.push(practice);
-                }
-            });
-            
-            console.log(`🔄 Deduplicated: ${practices.length} → ${unique.length} unique practices`);
-            return unique;
-        }
-
-        // Display practices on the map
-        function displayPractices(practices) {
-            clearMarkers();
-            
-            practices.forEach(practice => {
-                const marker = createPracticeMarker(practice);
-                practiceMarkers.push(marker);
-            });
-
-            // Re-add selected practice marker
-            if (selectedPractice) {
-                addSelectedPracticeMarker(selectedPractice);
-            }
-        }
-
-        // Create marker for a practice
-        function createPracticeMarker(practice) {
-            let color;
-            if (practice.hasActiveAds === true) {
-                color = '#dc2626'; // Red for has ads
-            } else if (practice.hasActiveAds === false) {
-                color = '#16a34a'; // Green for no ads
-            } else {
-                color = '#6b7280'; // Gray for unknown
-            }
-
-            const marker = new google.maps.Marker({
-                position: { lat: practice.lat, lng: practice.lng },
-                map: map,
-                title: practice.name,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(20, 20),
-                    anchor: new google.maps.Point(10, 10)
-                }
-            });
-
-            marker.addListener('click', () => {
-                showPracticeInfo(practice, marker);
-            });
-
-            return marker;
-        }
-
-        // Add marker for selected practice
-        function addSelectedPracticeMarker(place) {
-            const marker = new google.maps.Marker({
-                position: place.geometry.location,
-                map: map,
-                title: place.name,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#f59e0b" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="8" fill="#f59e0b" stroke="white" stroke-width="2"/>
-                            <circle cx="12" cy="12" r="3" fill="white"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(24, 24),
-                    anchor: new google.maps.Point(12, 12)
-                }
-            });
-
-            marker.addListener('click', () => {
-                showPracticeInfo(place, marker);
-            });
-
-            practiceMarkers.push(marker);
-        }
-
-        // Show practice info popup
-        function showPracticeInfo(practice, marker) {
-            const content = `
-                <div style="padding: 16px; border-radius: 12px; max-width: 300px; color: #333;">
-                    <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">${practice.name}</div>
-                    ${practice.formatted_address ? `<div style="margin-bottom: 6px;">📍 ${practice.formatted_address}</div>` : ''}
-                    ${practice.formatted_phone_number ? `<div style="margin-bottom: 6px;">📞 ${practice.formatted_phone_number}</div>` : ''}
-                    ${practice.website ? `<div style="margin-bottom: 6px;">🌐 <a href="${practice.website}" target="_blank" style="color: #f59e0b;">Website</a></div>` : ''}
-                    ${practice.rating ? `<div style="margin-bottom: 6px;">⭐ ${practice.rating} (${practice.user_ratings_total || 0} reviews)</div>` : ''}
-                    ${practice.hasActiveAds !== null ? `<div style="margin-bottom: 6px;">📱 Meta Ads: ${practice.hasActiveAds ? 'Active' : 'None'}</div>` : ''}
-                    <div style="font-size: 12px; color: #10b981; margin-top: 8px;">✅ ${practice.source || 'Google Places API'}</div>
-                </div>
-            `;
-
-            infoWindow.setContent(content);
-            infoWindow.open(map, marker);
-        }
-
-        // Update analysis results display
-        function updateAnalysisResults(practices) {
-            const total = practices.length;
-            const withAds = practices.filter(p => p.hasActiveAds === true).length;
-            const withoutAds = practices.filter(p => p.hasActiveAds === false).length;
-            const verified = practices.filter(p => p.adVerified === true).length;
-            const placesCount = practices.filter(p => p.source === 'google_places').length;
-            const yelpCount = practices.filter(p => p.source === 'yelp').length;
-            
-            const resultsDiv = document.getElementById('analysisResults');
-            resultsDiv.innerHTML = `
-                <strong style="color: var(--gold); font-size: 16px;">✅ ANALYSIS COMPLETE</strong><br><br>
-                
-                📊 <strong>${total}</strong> total practices found<br>
-                🔍 <strong>${placesCount}</strong> from Google Places API<br>
-                🔄 <strong>${yelpCount}</strong> from Yelp API<br>
-                🔴 <strong>${withAds}</strong> with active Meta advertising<br>
-                🟢 <strong>${withoutAds}</strong> without Meta advertising<br>
-                ✅ <strong>${verified}</strong> verified through Meta Ad Library<br>
-                📈 <strong>${total > 0 ? Math.round((verified / total) * 100) : 0}%</strong> data coverage<br><br>
-                
-                <div style="font-size: 12px; color: #10b981; margin-top: 12px;">
-                    🚀 LIVE DATA FROM REAL APIs!
-                </div>
-            `;
-        }
-
-        // Initialize event listeners
-        function initEventListeners() {
-            document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
-        }
-
-        // Clear all markers
-        function clearMarkers() {
-            practiceMarkers.forEach(marker => {
-                marker.setMap(null);
-            });
-            practiceMarkers = [];
-        }
-
-        // Show/hide loading
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = show ? 'flex' : 'none';
-        }
-
-        // Update loading text
-        function updateLoadingText(text, progress = '') {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingProgress').textContent = progress;
-        }
-
-        // Show message to user
-        function showMessage(message, type = 'info') {
-            // Remove existing messages
-            const existing = document.querySelector('.error-message, .success-message');
-            if (existing) {
-                existing.remove();
-            }
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = message;
-
-            const toolbar = document.querySelector('.toolbar');
-            toolbar.insertAdjacentElement('afterend', messageDiv);
-
-            // Auto-remove success messages
-            if (type === 'success') {
-                setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        messageDiv.remove();
-                    }
-                }, 5000);
-            }
-        }
-
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-</body>
-</html>
