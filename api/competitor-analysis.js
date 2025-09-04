@@ -1,4 +1,4 @@
-// api/competitor-analysis.js - Fixed Meta Ad Library API endpoint
+// api/competitor-analysis.js - Meta Ad Library API endpoint
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
