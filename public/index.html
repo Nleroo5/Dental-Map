@@ -386,6 +386,7 @@
     </div>
 
     <script>
+        // Global variables
         let map;
         let selectedPractice = null;
         let practiceMarkers = [];
@@ -393,14 +394,21 @@
         let autocompleteService;
         let placesService;
 
+        // Initialize the app
         async function initApp() {
             console.log('🚀 Initializing Dental Meta Ads Map Tool...');
             
             try {
+                // Get API key
                 const apiKey = await getApiKey();
+                
+                // Load Google Maps with Places library
                 await loadGoogleMaps(apiKey);
+                
+                // Initialize components
                 initializeComponents();
-                console.log('✅ App ready - Places API loaded successfully');
+                
+                console.log('✅ App ready - Everything loaded successfully');
                 
             } catch (error) {
                 console.error('❌ Initialization failed:', error);
@@ -408,6 +416,7 @@
             }
         }
 
+        // Get API key from server
         async function getApiKey() {
             try {
                 const response = await fetch('/api/config');
@@ -424,6 +433,7 @@
             }
         }
 
+        // Load Google Maps with Places library
         function loadGoogleMaps(apiKey) {
             return new Promise((resolve, reject) => {
                 if (window.google && window.google.maps && window.google.maps.places) {
@@ -433,7 +443,6 @@
                 }
                 
                 const script = document.createElement('script');
-                // CRITICAL FIX: Added &libraries=places to load Places API
                 script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
                 script.async = true;
                 script.onload = () => {
@@ -449,14 +458,16 @@
             });
         }
 
+        // Initialize components
         function initializeComponents() {
             initMap();
             initEventListeners();
             initPlacesAutocomplete();
         }
 
+        // Initialize Google Maps
         function initMap() {
-            const defaultCenter = { lat: 33.7490, lng: -84.3880 };
+            const defaultCenter = { lat: 33.7490, lng: -84.3880 }; // Atlanta
             
             map = new google.maps.Map(document.getElementById('map'), {
                 center: defaultCenter,
@@ -477,7 +488,7 @@
 
             infoWindow = new google.maps.InfoWindow();
             
-            // Initialize Places services - now with proper error checking
+            // Initialize Places services
             try {
                 autocompleteService = new google.maps.places.AutocompleteService();
                 placesService = new google.maps.places.PlacesService(map);
@@ -488,6 +499,7 @@
             }
         }
 
+        // Initialize Places autocomplete
         function initPlacesAutocomplete() {
             if (!autocompleteService) {
                 console.log('❌ Autocomplete service not available');
@@ -519,6 +531,7 @@
             });
         }
 
+        // Get Places autocomplete suggestions
         function getPlacesAutocomplete(input) {
             if (!autocompleteService) {
                 console.log('❌ Autocomplete service not available');
@@ -556,6 +569,7 @@
             });
         }
 
+        // Display autocomplete results
         function displayAutocompleteResults(predictions) {
             const dropdown = document.getElementById('autocompleteDropdown');
             dropdown.innerHTML = '';
@@ -584,6 +598,7 @@
             dropdown.style.display = 'block';
         }
 
+        // Select practice from autocomplete
         function selectPracticeFromPrediction(prediction) {
             if (!placesService) {
                 showMessage('Places service not available', 'error');
@@ -621,6 +636,7 @@
             });
         }
 
+        // Get nearby practices from Google Places
         function getNearbyPracticesFromPlaces(center, radiusMeters) {
             return new Promise((resolve, reject) => {
                 if (!placesService) {
@@ -646,15 +662,17 @@
                             user_ratings_total: place.user_ratings_total,
                             source: 'google_places'
                         }));
+                        console.log(`✅ Found ${practices.length} practices from Google Places`);
                         resolve(practices);
                     } else {
-                        console.error('Nearby search failed:', status);
+                        console.error('❌ Nearby search failed:', status);
                         resolve([]);
                     }
                 });
             });
         }
 
+        // Get practices from Yelp API
         async function getNearbyPracticesFromYelp(center, radius) {
             try {
                 console.log('🔍 Searching Yelp for additional practices...');
@@ -673,6 +691,7 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(`✅ Found ${data.practices?.length || 0} practices from Yelp`);
                     return data.practices || [];
                 } else {
                     console.error('❌ Yelp search failed:', response.status);
@@ -684,6 +703,7 @@
             }
         }
 
+        // Check Meta ads for practices
         async function checkMetaAdsForPractices(practices) {
             try {
                 console.log('📱 Checking Meta advertising status...');
@@ -700,6 +720,7 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('✅ Meta ads analysis complete');
                     
                     return practices.map(practice => {
                         const adData = data.practiceBreakdown?.find(p => p.practiceId === practice.place_id);
@@ -730,6 +751,121 @@
             }
         }
 
+        // Main analysis function
+        async function analyzeMarket() {
+            if (!selectedPractice) {
+                showMessage('Please select a practice first', 'error');
+                return;
+            }
+
+            showLoading(true);
+            clearMarkers();
+            
+            try {
+                updateLoadingText('Finding nearby practices with Google Places API...');
+                
+                const radiusSelect = document.getElementById('radius');
+                const radiusMiles = parseInt(radiusSelect.value);
+                const radiusMeters = radiusMiles * 1609.34;
+
+                // Get practices from Google Places
+                const placesPractices = await getNearbyPracticesFromPlaces(selectedPractice.geometry.location, radiusMeters);
+                
+                updateLoadingText('Expanding search with Yelp API...');
+                
+                // Get additional practices from Yelp
+                const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
+                
+                updateLoadingText('Removing duplicates...');
+                
+                // Combine and deduplicate
+                const allPractices = deduplicatePractices([...placesPractices, ...yelpPractices]);
+                
+                updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} practices`);
+                
+                // Check Meta ads
+                const practicesWithAds = await checkMetaAdsForPractices(allPractices);
+                
+                // Display results
+                displayPractices(practicesWithAds);
+                updateAnalysisResults(practicesWithAds);
+                
+                showLoading(false);
+                showMessage(`Analysis complete! Found ${practicesWithAds.length} practices.`, 'success');
+                
+            } catch (error) {
+                console.error('❌ Analysis error:', error);
+                showLoading(false);
+                showMessage(`Analysis failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Deduplicate practices from multiple sources
+        function deduplicatePractices(practices) {
+            const unique = [];
+            const seenNames = new Set();
+            
+            practices.forEach(practice => {
+                const normalizedName = practice.name.toLowerCase().trim();
+                if (!seenNames.has(normalizedName)) {
+                    seenNames.add(normalizedName);
+                    unique.push(practice);
+                }
+            });
+            
+            console.log(`🔄 Deduplicated: ${practices.length} → ${unique.length} unique practices`);
+            return unique;
+        }
+
+        // Display practices on the map
+        function displayPractices(practices) {
+            clearMarkers();
+            
+            practices.forEach(practice => {
+                const marker = createPracticeMarker(practice);
+                practiceMarkers.push(marker);
+            });
+
+            // Re-add selected practice marker
+            if (selectedPractice) {
+                addSelectedPracticeMarker(selectedPractice);
+            }
+        }
+
+        // Create marker for a practice
+        function createPracticeMarker(practice) {
+            let color;
+            if (practice.hasActiveAds === true) {
+                color = '#dc2626'; // Red for has ads
+            } else if (practice.hasActiveAds === false) {
+                color = '#16a34a'; // Green for no ads
+            } else {
+                color = '#6b7280'; // Gray for unknown
+            }
+
+            const marker = new google.maps.Marker({
+                position: { lat: practice.lat, lng: practice.lng },
+                map: map,
+                title: practice.name,
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(20, 20),
+                    anchor: new google.maps.Point(10, 10)
+                }
+            });
+
+            marker.addListener('click', () => {
+                showPracticeInfo(practice, marker);
+            });
+
+            return marker;
+        }
+
+        // Add marker for selected practice
         function addSelectedPracticeMarker(place) {
             const marker = new google.maps.Marker({
                 position: place.geometry.location,
@@ -754,6 +890,7 @@
             practiceMarkers.push(marker);
         }
 
+        // Show practice info popup
         function showPracticeInfo(practice, marker) {
             const content = `
                 <div style="padding: 16px; border-radius: 12px; max-width: 300px; color: #333;">
@@ -762,6 +899,7 @@
                     ${practice.formatted_phone_number ? `<div style="margin-bottom: 6px;">📞 ${practice.formatted_phone_number}</div>` : ''}
                     ${practice.website ? `<div style="margin-bottom: 6px;">🌐 <a href="${practice.website}" target="_blank" style="color: #f59e0b;">Website</a></div>` : ''}
                     ${practice.rating ? `<div style="margin-bottom: 6px;">⭐ ${practice.rating} (${practice.user_ratings_total || 0} reviews)</div>` : ''}
+                    ${practice.hasActiveAds !== null ? `<div style="margin-bottom: 6px;">📱 Meta Ads: ${practice.hasActiveAds ? 'Active' : 'None'}</div>` : ''}
                     <div style="font-size: 12px; color: #10b981; margin-top: 8px;">✅ ${practice.source || 'Google Places API'}</div>
                 </div>
             `;
@@ -770,104 +908,85 @@
             infoWindow.open(map, marker);
         }
 
+        // Update analysis results display
+        function updateAnalysisResults(practices) {
+            const total = practices.length;
+            const withAds = practices.filter(p => p.hasActiveAds === true).length;
+            const withoutAds = practices.filter(p => p.hasActiveAds === false).length;
+            const verified = practices.filter(p => p.adVerified === true).length;
+            const placesCount = practices.filter(p => p.source === 'google_places').length;
+            const yelpCount = practices.filter(p => p.source === 'yelp').length;
+            
+            const resultsDiv = document.getElementById('analysisResults');
+            resultsDiv.innerHTML = `
+                <strong style="color: var(--gold); font-size: 16px;">✅ ANALYSIS COMPLETE</strong><br><br>
+                
+                📊 <strong>${total}</strong> total practices found<br>
+                🔍 <strong>${placesCount}</strong> from Google Places API<br>
+                🔄 <strong>${yelpCount}</strong> from Yelp API<br>
+                🔴 <strong>${withAds}</strong> with active Meta advertising<br>
+                🟢 <strong>${withoutAds}</strong> without Meta advertising<br>
+                ✅ <strong>${verified}</strong> verified through Meta Ad Library<br>
+                📈 <strong>${total > 0 ? Math.round((verified / total) * 100) : 0}%</strong> data coverage<br><br>
+                
+                <div style="font-size: 12px; color: #10b981; margin-top: 12px;">
+                    🚀 LIVE DATA FROM REAL APIs!
+                </div>
+            `;
+        }
+
+        // Initialize event listeners
         function initEventListeners() {
             document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
         }
 
-        async function analyzeMarket() {
-            if (!selectedPractice) {
-                showMessage('Please select a practice first', 'error');
-                return;
+        // Clear all markers
+        function clearMarkers() {
+            practiceMarkers.forEach(marker => {
+                marker.setMap(null);
+            });
+            practiceMarkers = [];
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        // Update loading text
+        function updateLoadingText(text, progress = '') {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingProgress').textContent = progress;
+        }
+
+        // Show message to user
+        function showMessage(message, type = 'info') {
+            // Remove existing messages
+            const existing = document.querySelector('.error-message, .success-message');
+            if (existing) {
+                existing.remove();
             }
 
-            showLoading(true);
-            clearMarkers();
-            
-            try {
-                updateLoadingText('Finding nearby practices with Google Places API...');
-                
-                const radiusSelect = document.getElementById('radius');
-                const radiusMiles = parseInt(radiusSelect.value);
-                const radiusMeters = radiusMiles * 1609.34;
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.textContent = message;
 
-                const placesPractices = await getNearbyPracticesFromPlaces(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Expanding search with Yelp API...');
-                
-                const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Removing duplicates...');
-                
-                const allPractices = deduplicatePractices([...placesPractices, ...yelpPractices]);
-                
-                updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} practices`);
-                
-                const practicesWithAds = await checkMetaAdsForPractices(allPractices);
-                
-                displayPractices(practicesWithAds);
-                updateAnalysisResults(practicesWithAds);
-                
-                showLoading(false);
-                showMessage(`Analysis complete! Found ${practicesWithAds.length} practices.`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Analysis error:', error);
-                showLoading(false);
-                showMessage(`Analysis failed: ${error.message}`, 'error');
+            const toolbar = document.querySelector('.toolbar');
+            toolbar.insertAdjacentElement('afterend', messageDiv);
+
+            // Auto-remove success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.remove();
+                    }
+                }, 5000);
             }
         }
 
-        function deduplicatePractices(practices) {
-            const unique = [];
-            const seenNames = new Set();
-            
-            practices.forEach(practice => {
-                const normalizedName = practice.name.toLowerCase().trim();
-                if (!seenNames.has(normalizedName)) {
-                    seenNames.add(normalizedName);
-                    unique.push(practice);
-                }
-            });
-            
-            return unique;
-        }
-
-        function displayPractices(practices) {
-            clearMarkers();
-            
-            practices.forEach(practice => {
-                const marker = createPracticeMarker(practice);
-                practiceMarkers.push(marker);
-            });
-
-            if (selectedPractice) {
-                addSelectedPracticeMarker(selectedPractice);
-            }
-        }
-
-        function createPracticeMarker(practice) {
-            let color;
-            if (practice.hasActiveAds === true) {
-                color = '#dc2626';
-            } else if (practice.hasActiveAds === false) {
-                color = '#16a34a';
-            } else {
-                color = '#6b7280';
-            }
-
-            const marker = new google.maps.Marker({
-                position: { lat: practice.lat, lng: practice.lng },
-                map: map,
-                title: practice.name,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(20, 20),
-                    anchor: new google.maps.Point(10, 10)
-                }
-            });
-
-            marker.
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
