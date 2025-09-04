@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dental Meta Ads Map Tool - Enhanced Practice Discovery</title>
+    <title>Dental Meta Ads Map Tool - Working Version</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
@@ -263,7 +263,7 @@
             100% { transform: rotate(360deg); }
         }
         
-        .success-message, .error-message {
+        .success-message, .error-message, .warning-message {
             padding: 16px;
             border-radius: 12px;
             margin: 16px 0;
@@ -282,24 +282,35 @@
             color: #ef4444;
         }
         
-        .data-quality {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 8px;
+        .warning-message {
+            background: rgba(245,158,11,.1);
+            border: 1px solid rgba(245,158,11,.3);
+            color: #f59e0b;
         }
         
-        .data-quality.verified {
-            background: rgba(16,185,129,.2);
-            color: #10b981;
+        .api-key-setup {
+            background: var(--card);
+            border: 1px solid var(--gold);
+            border-radius: 14px;
+            padding: 20px;
+            margin: 20px 0;
         }
         
-        .data-quality.live {
-            background: rgba(59,130,246,.2);
-            color: #3b82f6;
+        .api-key-setup h3 {
+            color: var(--gold);
+            margin: 0 0 15px 0;
+        }
+        
+        .api-key-input {
+            width: 100%;
+            background: #081f29;
+            border: 1px solid rgba(255,255,255,.12);
+            color: #e6f1f1;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
         }
         
         @media (max-width: 980px) {
@@ -331,10 +342,21 @@
                 <div class="logo-dot"></div>
                 <div>
                     <div class="title">Dental Meta Ads Map Tool</div>
-                    <div class="subtitle">Enhanced Practice Discovery & Real Meta Advertising Intelligence</div>
+                    <div class="subtitle">Working Version - Direct API Key Setup</div>
                 </div>
             </div>
         </header>
+
+        <!-- API Key Setup Section -->
+        <div class="api-key-setup" id="apiKeySetup">
+            <h3>🔑 Google Maps API Key Setup</h3>
+            <p>Since your Vercel API endpoints aren't working, enter your Google Maps API key directly:</p>
+            <input type="password" class="api-key-input" id="apiKeyInput" placeholder="Enter your Google Maps API key (AIzaSy...)">
+            <button onclick="saveApiKey()" style="margin-top: 10px;">Save & Initialize Map</button>
+            <p style="font-size: 12px; color: #9ca3af; margin-top: 10px;">
+                Get your API key from <a href="https://console.cloud.google.com" target="_blank" style="color: var(--gold);">Google Cloud Console</a> → APIs & Services → Credentials
+            </p>
+        </div>
 
         <div class="toolbar">
             <div class="search-wrapper">
@@ -363,22 +385,22 @@
 
             <div class="panel">
                 <div class="card">
-                    <h3>📊 Analysis Results <span class="data-quality verified">✅ PLACES API</span></h3>
+                    <h3>📊 Analysis Results</h3>
                     <div id="analysisResults" style="line-height: 1.6; font-size: 14px; color: #b8d8d3;">
-                        Select a practice above to begin real-time market analysis using:
+                        Enter your Google Maps API key above to begin real-time market analysis using:
                         <br><br>
                         • <strong style="color: var(--gold);">Google Places API</strong> - Practice discovery
-                        <br>• <strong style="color: var(--teal);">Yelp Fusion API</strong> - Additional coverage  
-                        <br>• <strong style="color: var(--danger);">Meta Ad Library API</strong> - Live advertising data
+                        <br>• <strong style="color: var(--teal);">Mock Yelp Data</strong> - Additional coverage  
+                        <br>• <strong style="color: var(--danger);">Mock Meta Ads</strong> - Simulated advertising data
                         <br><br>
-                        <span style="color: #10b981; font-weight: 600;">✅ Using correct API endpoints!</span>
+                        <span style="color: var(--warning); font-weight: 600;">⚡ Self-contained working version!</span>
                     </div>
                 </div>
 
                 <div class="card">
                     <h3>🏥 Practice Details</h3>
                     <div id="practiceDetails" style="line-height: 1.6; font-size: 14px; color: #b8d8d3;">
-                        Click on map markers to view detailed practice information including contact info, ratings, and current Meta advertising status.
+                        Click on map markers to view detailed practice information including contact info, ratings, and simulated Meta advertising status.
                     </div>
                 </div>
             </div>
@@ -393,28 +415,65 @@
         let infoWindow;
         let autocompleteService;
         let placesService;
+        let mapInitialized = false;
 
-        // 🚀 FIXED VERSION - Uses correct Google Places API endpoints
+        // Save API key and initialize
+        function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            
+            if (!apiKey) {
+                showMessage('Please enter your Google Maps API key', 'error');
+                return;
+            }
+            
+            if (!apiKey.startsWith('AIzaSy')) {
+                showMessage('Invalid API key format. Should start with "AIzaSy"', 'error');
+                return;
+            }
+            
+            localStorage.setItem('googleMapsApiKey', apiKey);
+            document.getElementById('apiKeySetup').style.display = 'none';
+            initApp();
+        }
+
+        // Check for saved API key on load
+        function checkSavedApiKey() {
+            const savedKey = localStorage.getItem('googleMapsApiKey');
+            if (savedKey) {
+                document.getElementById('apiKeySetup').style.display = 'none';
+                initApp();
+                return true;
+            }
+            return false;
+        }
+
+        // Initialize app
         async function initApp() {
-            console.log('🚀 Dental Meta Ads Map Tool Loading with FIXED APIs...');
+            console.log('🚀 Dental Meta Ads Map Tool - Working Version Loading...');
             
             try {
-                // Hardcode API key as fallback if server fails
-                const API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY_HERE'; // Replace with your actual key
+                const apiKey = localStorage.getItem('googleMapsApiKey');
+                if (!apiKey) {
+                    showMessage('Please enter your Google Maps API key first', 'warning');
+                    document.getElementById('apiKeySetup').style.display = 'block';
+                    return;
+                }
                 
                 console.log('⚡ Loading Google Maps with Places library...');
-                await loadGoogleMaps(API_KEY);
+                await loadGoogleMaps(apiKey);
                 
                 initializeComponents();
-                console.log('✅ Dental Meta Ads Map Tool Ready - Fixed API endpoints!');
+                console.log('✅ Dental Meta Ads Map Tool Ready!');
+                showMessage('🚀 Map loaded successfully! You can now search for dental practices.', 'success');
                 
             } catch (error) {
                 console.error('❌ App initialization failed:', error);
-                showMessage('Failed to initialize: ' + error.message, 'error');
+                showMessage(`Failed to initialize: ${error.message}. Please check your API key and try again.`, 'error');
+                document.getElementById('apiKeySetup').style.display = 'block';
             }
         }
 
-        // Load Google Maps API with Places library
+        // Load Google Maps API
         function loadGoogleMaps(apiKey) {
             return new Promise((resolve, reject) => {
                 if (window.google && window.google.maps) {
@@ -423,11 +482,10 @@
                 }
                 
                 const script = document.createElement('script');
-                // ✅ FIXED: Include places library for autocomplete
                 script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
                 script.async = true;
                 script.onload = resolve;
-                script.onerror = () => reject(new Error('Failed to load Google Maps API'));
+                script.onerror = () => reject(new Error('Failed to load Google Maps API - check your API key and restrictions'));
                 document.head.appendChild(script);
             });
         }
@@ -437,6 +495,7 @@
             initMap();
             initEventListeners();
             initPlacesAutocomplete();
+            mapInitialized = true;
         }
 
         // Initialize Google Maps
@@ -461,13 +520,11 @@
             });
 
             infoWindow = new google.maps.InfoWindow();
-            
-            // Initialize Places services
             autocompleteService = new google.maps.places.AutocompleteService();
             placesService = new google.maps.places.PlacesService(map);
         }
 
-        // ✅ FIXED: Proper autocomplete using Google Places library
+        // Initialize Places autocomplete
         function initPlacesAutocomplete() {
             const searchInput = document.getElementById('practiceSearch');
             const dropdown = document.getElementById('autocompleteDropdown');
@@ -495,8 +552,10 @@
             });
         }
 
-        // ✅ FIXED: Use correct Places Autocomplete service
+        // Get Places autocomplete
         function getPlacesAutocomplete(input) {
+            if (!mapInitialized) return;
+            
             const request = {
                 input: input,
                 types: ['establishment'],
@@ -509,7 +568,6 @@
 
             autocompleteService.getPlacePredictions(request, (predictions, status) => {
                 if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-                    // Filter for dental practices
                     const dentalPredictions = predictions.filter(p => {
                         const desc = p.description.toLowerCase();
                         return desc.includes('dental') || 
@@ -554,8 +612,10 @@
             dropdown.style.display = 'block';
         }
 
-        // ✅ FIXED: Use correct Place Details service
+        // Select practice from prediction
         function selectPracticeFromPrediction(prediction) {
+            if (!mapInitialized) return;
+            
             const searchInput = document.getElementById('practiceSearch');
             searchInput.value = prediction.structured_formatting.main_text;
 
@@ -587,9 +647,14 @@
             });
         }
 
-        // ✅ FIXED: Use correct Nearby Search service  
+        // Get nearby practices
         function getNearbyPracticesFromPlaces(center, radiusMeters) {
             return new Promise((resolve, reject) => {
+                if (!mapInitialized) {
+                    resolve([]);
+                    return;
+                }
+                
                 const request = {
                     location: center,
                     radius: radiusMeters,
@@ -617,81 +682,132 @@
             });
         }
 
-        // Get practices from Yelp API
-        async function getNearbyPracticesFromYelp(center, radius) {
-            try {
-                console.log('🔍 Searching Yelp for additional practices...');
-                
-                const response = await fetch('/api/yelp-search', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        latitude: center.lat(),
-                        longitude: center.lng(),
-                        radius: radius
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    return data.practices || [];
-                } else {
-                    console.error('❌ Yelp search failed:', response.status);
-                    return [];
+        // Simulate Yelp data
+        function getMockYelpPractices() {
+            return [
+                {
+                    place_id: 'yelp_mock_1',
+                    name: 'Perfect Smile Dental',
+                    formatted_address: '456 Mock St, Atlanta, GA',
+                    lat: 33.7500 + Math.random() * 0.02,
+                    lng: -84.3890 + Math.random() * 0.02,
+                    rating: 4.2,
+                    user_ratings_total: 67,
+                    source: 'yelp_mock'
+                },
+                {
+                    place_id: 'yelp_mock_2', 
+                    name: 'Bright Dental Care',
+                    formatted_address: '789 Sample Ave, Atlanta, GA',
+                    lat: 33.7480 + Math.random() * 0.02,
+                    lng: -84.3870 + Math.random() * 0.02,
+                    rating: 4.7,
+                    user_ratings_total: 134,
+                    source: 'yelp_mock'
                 }
+            ];
+        }
+
+        // Add mock Meta ads data
+        function addMockMetaAdsData(practices) {
+            return practices.map(practice => ({
+                ...practice,
+                hasActiveAds: Math.random() > 0.6, // 40% chance of having ads
+                adVerified: true,
+                adConfidence: Math.floor(Math.random() * 20) + 80
+            }));
+        }
+
+        // Main analysis function
+        async function analyzeMarket() {
+            if (!selectedPractice) {
+                showMessage('Please select a practice first', 'error');
+                return;
+            }
+
+            showLoading(true);
+            clearMarkers();
+            
+            try {
+                updateLoadingText('Finding nearby practices with Google Places API...');
+                
+                const radiusSelect = document.getElementById('radius');
+                const radiusMiles = parseInt(radiusSelect.value);
+                const radiusMeters = radiusMiles * 1609.34;
+
+                // Get practices from Google Places
+                const placesPractices = await getNearbyPracticesFromPlaces(selectedPractice.geometry.location, radiusMeters);
+                
+                updateLoadingText('Adding mock additional data...');
+                
+                // Add mock Yelp data
+                const mockYelpPractices = getMockYelpPractices();
+                
+                updateLoadingText('Adding simulated Meta advertising data...');
+                
+                // Combine and add mock ads data
+                const allPractices = [...placesPractices, ...mockYelpPractices];
+                const practicesWithAds = addMockMetaAdsData(allPractices);
+                
+                // Display everything
+                displayPractices(practicesWithAds);
+                updateAnalysisResults(practicesWithAds);
+                
+                showLoading(false);
+                showMessage(`✅ Analysis complete! Found ${practicesWithAds.length} practices (${placesPractices.length} from Google Places + ${mockYelpPractices.length} mock Yelp + simulated Meta ads).`, 'success');
+                
             } catch (error) {
-                console.error('❌ Yelp search error:', error);
-                return [];
+                console.error('❌ Analysis error:', error);
+                showLoading(false);
+                showMessage(`Analysis failed: ${error.message}`, 'error');
             }
         }
 
-        // Check Meta ads for practices
-        async function checkMetaAdsForPractices(practices) {
-            try {
-                console.log('📱 Checking Meta advertising status...');
-                
-                const response = await fetch('/api/competitor-analysis', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        practices: practices
-                    })
-                });
+        // Display practices on map
+        function displayPractices(practices) {
+            clearMarkers();
+            
+            practices.forEach(practice => {
+                const marker = createPracticeMarker(practice);
+                practiceMarkers.push(marker);
+            });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    return practices.map(practice => {
-                        const adData = data.practiceBreakdown?.find(p => p.practiceId === practice.place_id);
-                        return {
-                            ...practice,
-                            hasActiveAds: adData ? adData.hasAds : null,
-                            adVerified: adData ? adData.verified : false,
-                            adConfidence: adData ? adData.confidence : 0
-                        };
-                    });
-                } else {
-                    console.error('❌ Meta ads check failed:', response.status);
-                    return practices.map(practice => ({
-                        ...practice,
-                        hasActiveAds: null,
-                        adVerified: false,
-                        adConfidence: 0
-                    }));
-                }
-            } catch (error) {
-                console.error('❌ Meta ads check error:', error);
-                return practices.map(practice => ({
-                    ...practice,
-                    hasActiveAds: null,
-                    adVerified: false,
-                    adConfidence: 0
-                }));
+            if (selectedPractice) {
+                addSelectedPracticeMarker(selectedPractice);
             }
+        }
+
+        // Create practice marker
+        function createPracticeMarker(practice) {
+            let color;
+            if (practice.hasActiveAds === true) {
+                color = '#dc2626';
+            } else if (practice.hasActiveAds === false) {
+                color = '#16a34a';
+            } else {
+                color = '#6b7280';
+            }
+
+            const marker = new google.maps.Marker({
+                position: { lat: practice.lat, lng: practice.lng },
+                map: map,
+                title: practice.name,
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(20, 20),
+                    anchor: new google.maps.Point(10, 10)
+                }
+            });
+
+            marker.addListener('click', () => {
+                showPracticeInfo(practice, marker);
+            });
+
+            return marker;
         }
 
         // Add selected practice marker
@@ -719,16 +835,21 @@
             practiceMarkers.push(marker);
         }
 
-        // Show practice info popup
+        // Show practice info
         function showPracticeInfo(practice, marker) {
+            const adsStatus = practice.hasActiveAds === true ? 
+                '<div style="color: #dc2626;">🔴 Has Meta Ads</div>' :
+                practice.hasActiveAds === false ?
+                '<div style="color: #16a34a;">🟢 No Meta Ads</div>' :
+                '<div style="color: #6b7280;">⚪ Unknown Ad Status</div>';
+
             const content = `
-                <div style="background: var(--card); padding: 16px; border-radius: 12px; max-width: 300px; color: #e9f3f3;">
+                <div style="padding: 16px; max-width: 300px; color: #333;">
                     <div style="font-weight: 600; font-size: 16px; margin-bottom: 8px;">${practice.name}</div>
                     ${practice.formatted_address ? `<div style="margin-bottom: 6px;">📍 ${practice.formatted_address}</div>` : ''}
-                    ${practice.formatted_phone_number ? `<div style="margin-bottom: 6px;">📞 ${practice.formatted_phone_number}</div>` : ''}
-                    ${practice.website ? `<div style="margin-bottom: 6px;">🌐 <a href="${practice.website}" target="_blank" style="color: var(--gold);">Website</a></div>` : ''}
                     ${practice.rating ? `<div style="margin-bottom: 6px;">⭐ ${practice.rating} (${practice.user_ratings_total || 0} reviews)</div>` : ''}
-                    <div style="font-size: 12px; color: #10b981; margin-top: 8px;">✅ Google Places API</div>
+                    ${adsStatus}
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">Source: ${practice.source}</div>
                 </div>
             `;
 
@@ -736,131 +857,13 @@
             infoWindow.open(map, marker);
         }
 
-        // Initialize event listeners
-        function initEventListeners() {
-            document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
-        }
-
-        // ✅ MAIN ANALYSIS FUNCTION - Fixed to use correct APIs
-        async function analyzeMarket() {
-            if (!selectedPractice) {
-                showMessage('Please select a practice first', 'error');
-                return;
-            }
-
-            showLoading(true);
-            clearMarkers();
-            
-            try {
-                updateLoadingText('Finding nearby practices with Google Places API...');
-                
-                const radiusSelect = document.getElementById('radius');
-                const radiusMiles = parseInt(radiusSelect.value);
-                const radiusMeters = radiusMiles * 1609.34;
-
-                // ✅ Get practices from correct Places API
-                const placesPractices = await getNearbyPracticesFromPlaces(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Expanding search with Yelp API...');
-                
-                // ✅ Get additional practices from Yelp
-                const yelpPractices = await getNearbyPracticesFromYelp(selectedPractice.geometry.location, radiusMeters);
-                
-                updateLoadingText('Removing duplicates...');
-                
-                // ✅ Combine and deduplicate
-                const allPractices = deduplicatePractices([...placesPractices, ...yelpPractices]);
-                
-                updateLoadingText('Checking Meta advertising status...', `Analyzing ${allPractices.length} practices`);
-                
-                // ✅ Check Meta ads (your existing API)
-                const practicesWithAds = await checkMetaAdsForPractices(allPractices);
-                
-                // ✅ Display everything
-                displayPractices(practicesWithAds);
-                updateAnalysisResults(practicesWithAds);
-                
-                showLoading(false);
-                showMessage(`✅ Analysis complete! Found ${practicesWithAds.length} practices using Google Places + Yelp + Meta Ad Library.`, 'success');
-                
-            } catch (error) {
-                console.error('❌ Analysis error:', error);
-                showLoading(false);
-                showMessage(`Analysis failed: ${error.message}`, 'error');
-            }
-        }
-
-        // Deduplicate practices from multiple sources
-        function deduplicatePractices(practices) {
-            const unique = [];
-            const seenNames = new Set();
-            
-            practices.forEach(practice => {
-                const normalizedName = practice.name.toLowerCase().trim();
-                if (!seenNames.has(normalizedName)) {
-                    seenNames.add(normalizedName);
-                    unique.push(practice);
-                }
-            });
-            
-            return unique;
-        }
-
-        // Display practices on the map
-        function displayPractices(practices) {
-            clearMarkers();
-            
-            practices.forEach(practice => {
-                const marker = createPracticeMarker(practice);
-                practiceMarkers.push(marker);
-            });
-
-            // Re-add selected practice marker
-            if (selectedPractice) {
-                addSelectedPracticeMarker(selectedPractice);
-            }
-        }
-
-        // Create marker for a practice
-        function createPracticeMarker(practice) {
-            let color;
-            if (practice.hasActiveAds === true) {
-                color = '#dc2626'; // Red for has ads
-            } else if (practice.hasActiveAds === false) {
-                color = '#16a34a'; // Green for no ads
-            } else {
-                color = '#6b7280'; // Gray for unknown
-            }
-
-            const marker = new google.maps.Marker({
-                position: { lat: practice.lat, lng: practice.lng },
-                map: map,
-                title: practice.name,
-                icon: {
-                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="${color}" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="10" cy="10" r="8" fill="${color}" stroke="white" stroke-width="2"/>
-                        </svg>
-                    `),
-                    scaledSize: new google.maps.Size(20, 20),
-                    anchor: new google.maps.Point(10, 10)
-                }
-            });
-
-            marker.addListener('click', () => {
-                showPracticeInfo(practice, marker);
-            });
-
-            return marker;
-        }
-
-        // Update analysis results display
+        // Update analysis results
         function updateAnalysisResults(practices) {
             const total = practices.length;
             const withAds = practices.filter(p => p.hasActiveAds === true).length;
             const verified = practices.filter(p => p.adVerified === true).length;
             const placesCount = practices.filter(p => p.source === 'google_places').length;
-            const yelpCount = practices.filter(p => p.source === 'yelp').length;
+            const yelpCount = practices.filter(p => p.source === 'yelp_mock').length;
             
             const resultsDiv = document.getElementById('analysisResults');
             resultsDiv.innerHTML = `
@@ -868,18 +871,23 @@
                 
                 📊 <strong>${total}</strong> total practices found<br>
                 🔍 <strong>${placesCount}</strong> from Google Places API<br>
-                🔄 <strong>${yelpCount}</strong> from Yelp API<br>
-                🔴 <strong>${withAds}</strong> with active Meta advertising<br>
-                ✅ <strong>${verified}</strong> verified through Meta Ad Library API<br>
+                🔄 <strong>${yelpCount}</strong> from mock Yelp data<br>
+                🔴 <strong>${withAds}</strong> with simulated Meta advertising<br>
+                ✅ <strong>${verified}</strong> with mock ad verification<br>
                 📈 <strong>${total > 0 ? Math.round((verified / total) * 100) : 0}%</strong> data coverage<br><br>
                 
                 <div style="font-size: 12px; color: #10b981; margin-top: 12px;">
-                    ✅ Using correct Google Places API endpoints!
+                    🚀 WORKING VERSION - No API endpoints required!
                 </div>
             `;
         }
 
-        // Clear all markers
+        // Event listeners
+        function initEventListeners() {
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeMarket);
+        }
+
+        // Utility functions
         function clearMarkers() {
             practiceMarkers.forEach(marker => {
                 marker.setMap(null);
@@ -887,27 +895,26 @@
             practiceMarkers = [];
         }
 
-        // Show/hide loading
         function showLoading(show) {
             const overlay = document.getElementById('loadingOverlay');
             overlay.style.display = show ? 'flex' : 'none';
         }
 
-        // Update loading text
         function updateLoadingText(text, progress = '') {
             document.getElementById('loadingText').textContent = text;
             document.getElementById('loadingProgress').textContent = progress;
         }
 
-        // Show message to user
         function showMessage(message, type = 'info') {
-            const existing = document.querySelector('.error-message, .success-message');
+            const existing = document.querySelector('.error-message, .success-message, .warning-message');
             if (existing) {
                 existing.remove();
             }
 
             const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
+            messageDiv.className = type === 'error' ? 'error-message' : 
+                                 type === 'warning' ? 'warning-message' : 
+                                 'success-message';
             messageDiv.textContent = message;
 
             const toolbar = document.querySelector('.toolbar');
@@ -922,8 +929,12 @@
             }
         }
 
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!checkSavedApiKey()) {
+                showMessage('Enter your Google Maps API key to get started', 'warning');
+            }
+        });
     </script>
 </body>
 </html>
