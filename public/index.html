@@ -400,7 +400,7 @@
                 const apiKey = await getApiKey();
                 await loadGoogleMaps(apiKey);
                 initializeComponents();
-                console.log('✅ App ready');
+                console.log('✅ App ready - Places API loaded successfully');
                 
             } catch (error) {
                 console.error('❌ Initialization failed:', error);
@@ -426,16 +426,25 @@
 
         function loadGoogleMaps(apiKey) {
             return new Promise((resolve, reject) => {
-                if (window.google && window.google.maps) {
+                if (window.google && window.google.maps && window.google.maps.places) {
+                    console.log('Google Maps already loaded with Places');
                     resolve();
                     return;
                 }
                 
                 const script = document.createElement('script');
+                // CRITICAL FIX: Added &libraries=places to load Places API
                 script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
                 script.async = true;
-                script.onload = resolve;
-                script.onerror = () => reject(new Error('Failed to load Google Maps'));
+                script.onload = () => {
+                    if (window.google && window.google.maps && window.google.maps.places) {
+                        console.log('✅ Google Maps loaded successfully with Places API');
+                        resolve();
+                    } else {
+                        reject(new Error('Places library failed to load'));
+                    }
+                };
+                script.onerror = () => reject(new Error('Failed to load Google Maps API'));
                 document.head.appendChild(script);
             });
         }
@@ -467,11 +476,24 @@
             });
 
             infoWindow = new google.maps.InfoWindow();
-            autocompleteService = new google.maps.places.AutocompleteService();
-            placesService = new google.maps.places.PlacesService(map);
+            
+            // Initialize Places services - now with proper error checking
+            try {
+                autocompleteService = new google.maps.places.AutocompleteService();
+                placesService = new google.maps.places.PlacesService(map);
+                console.log('✅ Places services initialized successfully');
+            } catch (error) {
+                console.error('❌ Failed to initialize Places services:', error);
+                showMessage('Places API not available - autocomplete disabled', 'error');
+            }
         }
 
         function initPlacesAutocomplete() {
+            if (!autocompleteService) {
+                console.log('❌ Autocomplete service not available');
+                return;
+            }
+
             const searchInput = document.getElementById('practiceSearch');
             const dropdown = document.getElementById('autocompleteDropdown');
             let debounceTimeout;
@@ -498,6 +520,11 @@
         }
 
         function getPlacesAutocomplete(input) {
+            if (!autocompleteService) {
+                console.log('❌ Autocomplete service not available');
+                return;
+            }
+
             const request = {
                 input: input,
                 types: ['establishment'],
@@ -509,6 +536,8 @@
             };
 
             autocompleteService.getPlacePredictions(request, (predictions, status) => {
+                console.log('Autocomplete status:', status);
+                
                 if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
                     const dentalPredictions = predictions.filter(p => {
                         const desc = p.description.toLowerCase();
@@ -518,8 +547,10 @@
                                desc.includes('smile');
                     });
                     
+                    console.log(`Found ${dentalPredictions.length} dental predictions`);
                     displayAutocompleteResults(dentalPredictions.slice(0, 5));
                 } else {
+                    console.log('No predictions or error:', status);
                     document.getElementById('autocompleteDropdown').style.display = 'none';
                 }
             });
@@ -554,6 +585,11 @@
         }
 
         function selectPracticeFromPrediction(prediction) {
+            if (!placesService) {
+                showMessage('Places service not available', 'error');
+                return;
+            }
+
             const searchInput = document.getElementById('practiceSearch');
             searchInput.value = prediction.structured_formatting.main_text;
 
@@ -580,13 +616,18 @@
                     showMessage(`Selected: ${place.name}`, 'success');
                 } else {
                     console.error('Place details request failed:', status);
-                    showMessage('Error getting practice details', 'error');
+                    showMessage('Error getting practice details: ' + status, 'error');
                 }
             });
         }
 
         function getNearbyPracticesFromPlaces(center, radiusMeters) {
             return new Promise((resolve, reject) => {
+                if (!placesService) {
+                    resolve([]);
+                    return;
+                }
+
                 const request = {
                     location: center,
                     radius: radiusMeters,
@@ -829,77 +870,4 @@
                 }
             });
 
-            marker.addListener('click', () => {
-                showPracticeInfo(practice, marker);
-            });
-
-            return marker;
-        }
-
-        function updateAnalysisResults(practices) {
-            const total = practices.length;
-            const withAds = practices.filter(p => p.hasActiveAds === true).length;
-            const verified = practices.filter(p => p.adVerified === true).length;
-            const placesCount = practices.filter(p => p.source === 'google_places').length;
-            const yelpCount = practices.filter(p => p.source === 'yelp').length;
-            
-            const resultsDiv = document.getElementById('analysisResults');
-            resultsDiv.innerHTML = `
-                <strong style="color: var(--gold); font-size: 16px;">ANALYSIS COMPLETE</strong><br><br>
-                
-                📊 <strong>${total}</strong> total practices found<br>
-                🔍 <strong>${placesCount}</strong> from Google Places API<br>
-                🔄 <strong>${yelpCount}</strong> from Yelp API<br>
-                🔴 <strong>${withAds}</strong> with active Meta advertising<br>
-                ✅ <strong>${verified}</strong> verified through Meta Ad Library API<br>
-                📈 <strong>${total > 0 ? Math.round((verified / total) * 100) : 0}%</strong> data coverage<br><br>
-                
-                <div style="font-size: 12px; color: #10b981; margin-top: 12px;">
-                    WORKING WITH REAL APIS
-                </div>
-            `;
-        }
-
-        function clearMarkers() {
-            practiceMarkers.forEach(marker => {
-                marker.setMap(null);
-            });
-            practiceMarkers = [];
-        }
-
-        function showLoading(show) {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.style.display = show ? 'flex' : 'none';
-        }
-
-        function updateLoadingText(text, progress = '') {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingProgress').textContent = progress;
-        }
-
-        function showMessage(message, type = 'info') {
-            const existing = document.querySelector('.error-message, .success-message');
-            if (existing) {
-                existing.remove();
-            }
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = type === 'error' ? 'error-message' : 'success-message';
-            messageDiv.textContent = message;
-
-            const toolbar = document.querySelector('.toolbar');
-            toolbar.insertAdjacentElement('afterend', messageDiv);
-
-            if (type === 'success') {
-                setTimeout(() => {
-                    if (messageDiv.parentNode) {
-                        messageDiv.remove();
-                    }
-                }, 5000);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
-</body>
-</html>
+            marker.
