@@ -11,11 +11,31 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/yelp-search.js",
+      "src": "api/yelp-search.js", 
       "use": "@vercel/node"
     },
     {
       "src": "api/config.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/census-data.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/generate-insight.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/invisalign-directory.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/territory-lock.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "api/website-scraper.js",
       "use": "@vercel/node"
     }
   ],
@@ -29,6 +49,23 @@
       "dest": "/public/$1"
     }
   ],
+  "functions": {
+    "api/competitor-analysis.js": {
+      "maxDuration": 300
+    },
+    "api/generate-insight.js": {
+      "maxDuration": 60
+    },
+    "api/website-scraper.js": {
+      "maxDuration": 30
+    },
+    "api/yelp-search.js": {
+      "maxDuration": 30
+    },
+    "api/census-data.js": {
+      "maxDuration": 30
+    }
+  },
   "env": {
     "NODE_ENV": "production"
   }
