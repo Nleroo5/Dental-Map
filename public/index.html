@@ -392,12 +392,30 @@
         let practiceMarkers = [];
         let infoWindow;
         let GOOGLE_MAPS_API_KEY = '';
+
         // 🚀 FULL WORKING APP - Uses New Places API (REST) only
         async function initApp() {
             console.log('🚀 FULL Dental Meta Ads Map Tool Loading with NEW APIs...');
             
             try {
-                console.log('⚡ Loading Google Maps (basic Maps API only, no deprecated libraries)...');
+                // Get API key from server first
+                console.log('Getting API key from server...');
+                const configResponse = await fetch('/api/config');
+                
+                if (!configResponse.ok) {
+                    throw new Error('Failed to get API key from server');
+                }
+                
+                const config = await configResponse.json();
+                
+                if (!config.success || !config.googleMapsApiKey) {
+                    throw new Error('API key not available');
+                }
+                
+                GOOGLE_MAPS_API_KEY = config.googleMapsApiKey;
+                console.log('✅ Got API key from server');
+                
+                console.log('⚡ Loading Google Maps...');
                 await loadGoogleMaps(GOOGLE_MAPS_API_KEY);
                 
                 initializeComponents();
@@ -405,7 +423,7 @@
                 
             } catch (error) {
                 console.error('❌ App initialization failed:', error);
-                showMessage('Failed to initialize Google Maps: ' + error.message, 'error');
+                showMessage('Failed to initialize: ' + error.message, 'error');
             }
         }
 
