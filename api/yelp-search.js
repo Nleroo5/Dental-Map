@@ -1,9 +1,8 @@
-// api/yelp-search.js - Yelp Business Search Endpoint
-const https = require('https');
+// api/yelp-search.js - Yelp Business Search Endpoint (Fixed ES6 version)
 
 const YELP_API_BASE = 'https://api.yelp.com/v3/businesses/search';
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
     // Set CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -65,55 +64,40 @@ module.exports = async (req, res) => {
             fallbackUsed: false
         });
     }
-};
+}
 
 // Search Yelp businesses
 async function searchYelpBusinesses(latitude, longitude, radiusMeters) {
-    return new Promise((resolve, reject) => {
-        const params = new URLSearchParams({
-            term: 'dentist',
-            latitude: latitude.toString(),
-            longitude: longitude.toString(),
-            radius: Math.min(radiusMeters, 40000).toString(), // Yelp max radius is 40km
-            categories: 'dentists,orthodontists',
-            limit: '50',
-            sort_by: 'distance'
-        });
-
-        const url = `${YELP_API_BASE}?${params}`;
-
-        const options = {
-            headers: {
-                'Authorization': `Bearer ${process.env.YELP_API_KEY}`,
-                'User-Agent': 'Dental-Map-Tool/1.0'
-            }
-        };
-
-        https.get(url, options, (response) => {
-            let data = '';
-
-            response.on('data', (chunk) => {
-                data += chunk;
-            });
-
-            response.on('end', () => {
-                try {
-                    const result = JSON.parse(data);
-                    
-                    if (result.error) {
-                        reject(new Error(`Yelp API error: ${result.error.description || result.error.code}`));
-                        return;
-                    }
-
-                    resolve(result.businesses || []);
-                } catch (error) {
-                    reject(new Error(`JSON parse error: ${error.message}`));
-                }
-            });
-        }).on('error', (error) => {
-            reject(new Error(`Request error: ${error.message}`));
-        });
+    const params = new URLSearchParams({
+        term: 'dentist',
+        latitude: latitude.toString(),
+        longitude: longitude.toString(),
+        radius: Math.min(radiusMeters, 40000).toString(), // Yelp max radius is 40km
+        categories: 'dentists,orthodontists',
+        limit: '50',
+        sort_by: 'distance'
     });
+
+    const url = `${YELP_API_BASE}?${params}`;
+
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `Bearer ${process.env.YELP_API_KEY}`,
+            'User-Agent': 'Dental-Map-Tool/1.0'
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Yelp API error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.error) {
+        throw new Error(`Yelp API error: ${result.error.description || result.error.code}`);
+    }
+
+    return result.businesses || [];
 }
 
 // Transform Yelp business data to our internal format
@@ -165,42 +149,9 @@ function mapYelpPriceLevel(yelpPrice) {
     
     switch (yelpPrice.length) {
         case 1: return 1; // $
-        case 2: return 2; // $$
-        case 3: return 3; // $$$
-        case 4: return 4; // $$$$
+        case 2: return 2; // $
+        case 3: return 3; // $$
+        case 4: return 4; // $$
         default: return null;
     }
-}
-
-// Helper function to calculate distance between two points (for deduplication)
-function calculateDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = 
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-        Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c * 1000; // Distance in meters
-}
-
-// Validate if business is actually a dental practice
-function isDentalPractice(business) {
-    const name = business.name.toLowerCase();
-    const categories = business.categories?.map(cat => cat.alias.toLowerCase()) || [];
-    
-    // Check if it's explicitly dental
-    const dentalKeywords = ['dental', 'dentist', 'orthodont', 'oral', 'teeth', 'smile'];
-    const hasDentalKeyword = dentalKeywords.some(keyword => 
-        name.includes(keyword) || categories.some(cat => cat.includes(keyword))
-    );
-
-    // Exclude non-dental medical practices
-    const excludeKeywords = ['medical', 'physician', 'hospital', 'urgent care', 'pharmacy'];
-    const hasExcludeKeyword = excludeKeywords.some(keyword => 
-        name.includes(keyword)
-    );
-
-    return hasDentalKeyword && !hasExcludeKeyword;
 }
